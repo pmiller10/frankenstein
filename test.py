@@ -12,17 +12,21 @@ class LinearModel(AbstractModel):
         self.model = model
         self.logger.debug(self.model)
 
+
     def _predict(self, data):
         return self.model.predict(data)
+
 
     def score(self, preds, targets):
         errors = [(((p - t) ** 2) ** .5) for p,t in zip(preds, targets)]
         return sum(errors)/float(len(errors))
 
+
     def create_datasets(self, data, targets):
         train_data, cv_data = data[::2], data[1::2]
         train_targets, cv_targets = targets[::2], targets[1::2]
         return train_data, cv_data, train_targets, cv_targets
+
 
     def _possible_hyper_params(self):
         return [{'normalize': True}, {'normalize': False}]

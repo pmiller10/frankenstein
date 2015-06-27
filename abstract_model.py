@@ -22,8 +22,10 @@ class AbstractModel():
         logger.addHandler(ch)
         self.logger = logger
 
+
     def fit(self, data, targets, hyper_params):
         raise NotImplementedError
+
 
     def predict(self, data):
         """
@@ -32,11 +34,13 @@ class AbstractModel():
         """
         return [self._predict(d) for d in data]
 
+
     def _predict(self, data):
         """
         param data: a list representing a single observation
         """
         raise NotImplementedError
+
 
     def optimize(self, data, targets):
         train_data, cv_data, train_targets, cv_targets = self.create_datasets(data, targets)
@@ -46,19 +50,24 @@ class AbstractModel():
             self.hyper_params_scores.append((params, score))
         self.hyper_params = self._best_hyper_params()
 
+
     def create_datasets(self, data, targets):
         raise NotImplementedError
+
 
     def cross_validate(self, train_data, cv_data, train_targets, cv_targets, hyper_params):
         self.fit(train_data, cv_data, hyper_params)
         preds = self.predict(cv_targets)
         return self.score(preds, cv_targets)
 
+
     def score(self, preds, targets):
         raise NotImplementedError
 
+
     def _possible_hyper_params(self):
         raise NotImplementedError
+
 
     def _best_hyper_params(self):
         scores = [score for params,score in self.hyper_params_scores]
