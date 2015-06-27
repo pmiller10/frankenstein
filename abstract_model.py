@@ -1,6 +1,6 @@
 import logging
 
-class AbstractModel():
+class AbstractModel(object):
 
     def __init__(self, log_level=logging.DEBUG):
         self.hyper_params = None
@@ -24,6 +24,8 @@ class AbstractModel():
 
 
     def fit(self, data, targets, hyper_params):
+        # TODO everytime this gets runin .fit, the model needs to be a new instance
+        # otherwise, you won't be training it from scratch
         raise NotImplementedError
 
 
