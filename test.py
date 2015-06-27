@@ -12,7 +12,6 @@ class LinearModel(AbstractModel):
         model.set_params(**hyper_params)
         model.fit(data, targets)
         self.model = model
-        self.logger.debug(self.model)
 
 
     def _predict(self, data):
@@ -76,14 +75,7 @@ class TestModel():
 
 
     def test_optimize(self):
-        model = LinearModel(log_level=logging.WARN)
-        data = [[i] for i in range(10)]
-        targets = range(10, 20)
-        model.optimize(data, targets)
-
-
-    def test_optimize(self):
-        model = LinearModel(log_level=logging.WARN)
+        model = LinearModel(log_level=logging.DEBUG)
         assert(model.hyper_params == None)
         assert(model.hyper_params_scores == [])
 
@@ -102,6 +94,5 @@ class TestModel():
 if __name__ == "__main__":
     TestModel().test_score()
     TestModel().test_datasets()
-    TestModel().test_optimize()
     TestModel().test_optimize()
     print 'success'
