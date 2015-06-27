@@ -8,12 +8,21 @@ class AbstractModel():
 
         logger = logging.getLogger(self.__class__.__name__)
         logger.setLevel(log_level)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
         fh = logging.FileHandler('log.txt')
         fh.setLevel(log_level)
+        fh.setFormatter(formatter)
+
+        ch = logging.StreamHandler()
+        ch.setLevel(log_level)
+        ch.setFormatter(formatter)
+
         logger.addHandler(fh)
+        logger.addHandler(ch)
         self.logger = logger
 
-    def fit(self, data, targets):
+    def fit(self, data, targets, hyper_params):
         raise NotImplementedError
 
     def predict(self, data):
@@ -32,19 +41,21 @@ class AbstractModel():
     def optimize(self, data, targets):
         train_data, cv_data, train_targets, cv_targets = self.create_datasets(data, targets)
         for params in self._possible_hyper_params():
-            score = self.cross_validate(train_data, cv_data, train_targets, cv_targets)
-            logger.info(params, score)
-            self.hyper_params.append((params, score))
+            score = self.cross_validate(train_data, cv_data, train_targets, cv_targets, params)
+            self.logger.info("{0}: {1}".format(params, score))
+            self.hyper_params_scores.append((params, score))
         self.hyper_params = self._best_hyper_params()
 
     def create_datasets(self, data, targets):
-        self.logger.debug('hello')
         raise NotImplementedError
 
-    def cross_validate(self, train_data, cv_data, train_targets, cv_targets):
-        self.fit(train_data, cv_data)
+    def cross_validate(self, train_data, cv_data, train_targets, cv_targets, hyper_params):
+        self.fit(train_data, cv_data, hyper_params)
         preds = self.predict(cv_targets)
         return self.score(preds, cv_targets)
+
+    def score(self, preds, targets):
+        raise NotImplementedError
 
     def _possible_hyper_params(self):
         raise NotImplementedError
@@ -56,9 +67,3 @@ class AbstractModel():
             if score == best:
                 self.hyper_params = params
                 return
-
-
-if __name__ == "__main__":
-    model = AbstractModel()
-    model.logger.debug('hello')
-    #model.optimize([], [])
