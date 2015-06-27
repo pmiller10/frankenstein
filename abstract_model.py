@@ -56,8 +56,8 @@ class AbstractModel():
 
 
     def cross_validate(self, train_data, cv_data, train_targets, cv_targets, hyper_params):
-        self.fit(train_data, cv_data, hyper_params)
-        preds = self.predict(cv_targets)
+        self.fit(train_data, train_targets, hyper_params)
+        preds = self.predict(cv_data)
         return self.score(preds, cv_targets)
 
 
@@ -74,5 +74,14 @@ class AbstractModel():
         best = min(scores)
         for params,score in self.hyper_params_scores:
             if score == best:
-                self.hyper_params = params
-                return
+                return params
+        raise Exception('best score not found')
+ 
+
+
+class AbstractEnsemble(AbstractModel):
+
+
+    def __init__(self, models):
+        self.models = models
+        self.__super__()
