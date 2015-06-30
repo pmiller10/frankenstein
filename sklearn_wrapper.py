@@ -2,13 +2,12 @@ from abstract_model import AbstractModel
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.svm import SVC
 import logging
+from sklearn.metrics import accuracy_score
 
 class SkLearnWrapper(AbstractModel):
 
 
     def fit(self, data, targets, hyper_params):
-        # TODO everytime this gets runin .fit, the model needs to be a new instance
-        # otherwise, you won't be training it from scratch
         self.model.set_params(**hyper_params)
         self.model.fit(data, targets)
 
@@ -18,9 +17,7 @@ class SkLearnWrapper(AbstractModel):
 
 
     def score(self, preds, targets):
-        errors = [(((p - t) ** 2) ** .5) for p,t in zip(preds, targets)]
-        avg_error = sum(errors)/float(len(errors))
-        return avg_error
+        return accuracy_score(targets, preds)
 
 
     def create_datasets(self, data, targets):
@@ -37,9 +34,8 @@ class LinearRegressionModel(SkLearnWrapper):
     """
 
 
-    def __init__(self, log_level=logging.DEBUG):
-        self.model = LinearRegression()  # TODO everytime this gets runin .fit, the model needs to be a new instance
-                                         # otherwise, you won't be training it from scratch
+    def __init__(self, score_type, log_level=logging.DEBUG):
+        self.score_type = score_type
         super(self.__class__, self).__init__(log_level)
 
 
@@ -57,15 +53,24 @@ class LogisticRegressionModel(SkLearnWrapper):
         verbose=0)
     """
 
-
-    def __init__(self, log_level=logging.DEBUG):
-        self.model = LogisticRegression()  # TODO everytime this gets runin .fit, the model needs to be a new instance
-                                         # otherwise, you won't be training it from scratch
+    def __init__(self, score_type, log_level=logging.DEBUG):
+        self.score_type = score_type
         super(self.__class__, self).__init__(log_level)
 
 
+    def _initialize_model(self):
+        self.model = LogisticRegression()
+
+
     def _possible_hyper_params(self):
-        return [{'penalty': 'l1'}, {'penalty': 'l2'}]
+        params = []
+        for penalty in ['l1', 'l2']:
+            for i in range(5):
+                c = (i * 2) + 1 
+                for j in [1., 0.2, 0.1, 0.01, 0.001, 0.0001, 0.00001]:
+                    tol = j
+                    params.append({'C': c, 'tol': tol, 'penalty': penalty})
+        return params
 
 
 
@@ -80,10 +85,13 @@ class SVCModel(SkLearnWrapper):
     """
 
 
-    def __init__(self, log_level=logging.DEBUG):
-        self.model = SVC()  # TODO everytime this gets runin .fit, the model needs to be a new instance
-                                         # otherwise, you won't be training it from scratch
+    def __init__(self, score_type, log_level=logging.DEBUG):
+        self.score_type = score_type
         super(self.__class__, self).__init__(log_level)
+
+
+    def _initialize_model(self):
+        self.model = SVC()
 
 
     def _possible_hyper_params(self):
