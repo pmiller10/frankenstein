@@ -1,28 +1,29 @@
 from sklearn import datasets
 import logging
 from sklearn_wrapper import LogisticRegressionModel
+from constants import ScoreType
 
 
 
 class TestModel():
 
     def test_score(self):
-        model = LogisticRegressionModel(log_level=logging.WARN)
+        model = LogisticRegressionModel(ScoreType.MINIMIZE, log_level=logging.WARN)
         preds, targets = range(10), range(10)
         score = model.score(preds, targets)
-        assert(score == 0)
+        assert(score == 1.)
 
         preds, targets = [0], [1]
         score = model.score(preds, targets)
-        assert(score == 1)
+        assert(score == 0.)
 
         preds, targets = range(10), range(10, 20)
         score = model.score(preds, targets)
-        assert(score == 10)
+        assert(score == 0.)
 
 
     def test_datasets(self):
-        model = LogisticRegressionModel(log_level=logging.WARN)
+        model = LogisticRegressionModel(ScoreType.MINIMIZE, log_level=logging.WARN)
         data = [[i] for i in range(10)]
         targets = range(10)
 
@@ -43,7 +44,7 @@ class TestModel():
 
 
     def test_optimize(self):
-        model = LogisticRegressionModel(log_level=logging.WARN)
+        model = LogisticRegressionModel(ScoreType.MINIMIZE, log_level=logging.WARN)
         assert(model.hyper_params == None)
         assert(model.hyper_params_scores == [])
 
@@ -52,8 +53,7 @@ class TestModel():
         targets = list(iris.target)
         model.optimize(data, targets)
 
-        assert(model.hyper_params == {'penalty': 'l1'})
-        assert(len(model.hyper_params_scores) == 2)
+        assert(len(model.hyper_params_scores) == 70)
 
 
 
