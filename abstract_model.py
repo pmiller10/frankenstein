@@ -1,8 +1,10 @@
 import logging
+from constants import ScoreType
 
 class AbstractModel(object):
 
     def __init__(self, log_level=logging.DEBUG):
+        self.model = None
         self.hyper_params = None
         self.hyper_params_scores = list()
 
@@ -24,8 +26,6 @@ class AbstractModel(object):
 
 
     def fit(self, data, targets, hyper_params):
-        # TODO everytime this gets runin .fit, the model needs to be a new instance
-        # otherwise, you won't be training it from scratch
         raise NotImplementedError
 
 
@@ -58,9 +58,19 @@ class AbstractModel(object):
 
 
     def cross_validate(self, train_data, cv_data, train_targets, cv_targets, hyper_params):
+        self._initialize_model()
         self.fit(train_data, train_targets, hyper_params)
         preds = self.predict(cv_data)
         return self.score(preds, cv_targets)
+
+
+    def _initialize_model(self):
+        """
+        This should initialize the weights of the model in place.
+        For example,
+        self.model = sklearn.linear_model.LogisticRegression()
+        """
+        raise NotImplementedError
 
 
     def score(self, preds, targets):
@@ -73,7 +83,12 @@ class AbstractModel(object):
 
     def _best_hyper_params(self):
         scores = [score for params,score in self.hyper_params_scores]
-        best = min(scores)
+        if self.score_type == ScoreType.MINIMIZE:
+            best = min(scores)
+        elif self.score_type == ScoreType.MAXIMIZE:
+            best = max(scores)
+        else:
+            raise Exception('{0}.score_type not defined'.format(self.__class__.__name__))
         for params,score in self.hyper_params_scores:
             if score == best:
                 return params
