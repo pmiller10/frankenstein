@@ -95,4 +95,12 @@ class SVCModel(SkLearnWrapper):
 
 
     def _possible_hyper_params(self):
-        return [{'shrinking': True}, {'shrinking': False}]
+        params = []
+        costs = [(i + 1.) for i in range(10)]
+        degree = [i for i in range(5)]
+        tolerance = [.1 ** i for i in range(5)]
+        for c in costs:
+            for d in degree:
+                for tol in tolerance:
+                    params.append({'C': c, 'tol': tol, 'degree': d})
+        return params
