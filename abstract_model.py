@@ -1,5 +1,6 @@
 import logging
 from constants import ScoreType
+from collections import defaultdict
 
 class AbstractModel(object):
 
@@ -99,6 +100,60 @@ class AbstractModel(object):
 class AbstractEnsemble(AbstractModel):
 
 
-    def __init__(self, models):
-        self.models = models
-        self.__super__()
+    #def __init__(self, models, score_type, log_level=logging.DEBUG):
+        #self.models = models
+        #self.score_type = score_type
+        #super(self.__class__, self).__init__(log_level)
+
+    
+    def optimize(self, data, targets):
+        for m in self.models:
+            print len(data)
+            m.optimize(data, targets)
+
+    
+    #def _predict(self, data):
+        #preds = [m.predict(data) for m in self.models]
+        #return self._vote(preds) 
+
+
+    def predict(self, data):
+        preds = [m.predict(data) for m in self.models]
+        number_of_models = range(len(self.models))
+        number_of_preds = range(len(data))
+        weighted_preds = []
+        for i in number_of_preds:
+            preds_for_one = [preds[j][i] for j in number_of_models]
+            weighted_pred = self._vote(preds_for_one) 
+            weighted_preds.append(weighted_pred)
+        return weighted_preds
+
+
+    def _vote(self, preds):
+        return NotImplementedError
+
+
+    def fit(self, data, targets, _):
+        for m in self.models:
+            print len(data)
+            m.fit(data, targets, m.hyper_params)
+
+
+
+class ClassifierEnsemble(AbstractEnsemble):
+
+
+    def __init__(self, models, score_type, log_level=logging.DEBUG):
+        self.models = models  # TODO should you init the model classes here, rather than be passed the isntances?
+        self.score_type = score_type
+        super(self.__class__, self).__init__(log_level)
+
+
+    def _vote(self, preds):
+        votes = defaultdict(int)
+        for p in preds:
+            votes[p] += 1
+        most_votes = max(votes.values())
+        for klass,vote_count in votes.items():
+            if vote_count == most_votes:
+                return klass

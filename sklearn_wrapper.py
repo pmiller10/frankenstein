@@ -13,7 +13,11 @@ class SkLearnWrapper(AbstractModel):
 
 
     def _predict(self, data):
-        return self.model.predict(data)
+        #print data, self.__class__.__name__
+        preds = self.model.predict(data)
+        #print preds
+        #import pdb; pdb.set_trace()
+        return preds[0]
 
 
     def score(self, preds, targets):
