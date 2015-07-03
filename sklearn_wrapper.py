@@ -2,7 +2,7 @@ from abstract_model import AbstractModel
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.svm import SVC
 import logging
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, mean_absolute_error
 
 class SkLearnWrapper(AbstractModel):
 
@@ -13,10 +13,7 @@ class SkLearnWrapper(AbstractModel):
 
 
     def _predict(self, data):
-        #print data, self.__class__.__name__
         preds = self.model.predict(data)
-        #print preds
-        #import pdb; pdb.set_trace()
         return preds[0]
 
 
@@ -43,9 +40,16 @@ class LinearRegressionModel(SkLearnWrapper):
         super(self.__class__, self).__init__(log_level)
 
 
+    def _initialize_model(self):  # TODO needs testing
+        self.model = LinearRegression()
+
+
     def _possible_hyper_params(self):
         return [{'normalize': True}, {'normalize': False}]
 
+
+    def score(self, preds, targets):
+        return mean_absolute_error(targets, preds)
 
 
 class LogisticRegressionModel(SkLearnWrapper):

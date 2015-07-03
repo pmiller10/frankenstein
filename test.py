@@ -2,6 +2,8 @@ from sklearn import datasets
 import logging
 from sklearn_wrapper import LogisticRegressionModel
 from constants import ScoreType
+from feature import Feature
+import lib
 
 
 
@@ -57,9 +59,80 @@ class TestModel():
 
 
 
+class TestFeature():
+
+    def _test_polynomial(self, polynomial):
+        data = range(10)
+        data = [float(d) for d in data]
+        targets = [d**polynomial for d in data]
+        data = [[d] for d in data]
+
+        feature = Feature(ScoreType.MINIMIZE)
+        feature.optimize(data, targets)
+
+        assert feature.polynomial == polynomial, "{0} != {1}".format(feature.polynomial, polynomial)
+
+    def test_optimize_2nd_order_polynomial(self):
+        self._test_polynomial(2)
+
+
+
+class TestLib():
+
+    def test_polynomial(self):
+        n = 4
+        poly = 2
+        data, expected = range(n), range(n)
+        squared = [e**poly for e in expected]
+        expected.extend(squared)
+
+        output = lib.polynomial(data, poly)
+
+        leftover = (output-expected).any()
+        assert leftover == False, "{0} != {1}".format(output, expected)
+
+
+    def test_norm_positives(self):
+        data = [0., 5., 10.]
+        expected = [0., .5, 1.]
+        output = lib.norm(data)
+        leftover = (output-expected).any()
+        assert leftover == False, "{0} != {1}".format(output, expected)
+        
+
+    def test_norm_negatives(self):
+        data = [-10., 0., 10.]
+        expected = [0., .5, 1.]
+        output = lib.norm(data)
+        leftover = (output-expected).any()
+        assert leftover == False, "{0} != {1}".format(output, expected)
+
+    
+    def test_scaler_vector(self):
+        data = [-1., 0., 1]
+        output = lib.scale(data)
+        assert sum(output) == 0
+
+
+    def test_scaler_matrix(self):
+        d1 = [-10., 0., 50.]
+        d2 = [-100., 0., 100.]
+        data = [d1, d2]
+        output = lib.scale(data)
+        assert sum(sum(output)) == 0
+
+        
+
+
  
 if __name__ == "__main__":
     TestModel().test_score()
     TestModel().test_datasets()
     TestModel().test_optimize()
+    TestLib().test_polynomial()
+    TestLib().test_norm_positives()
+    TestLib().test_norm_negatives()
+    TestLib().test_scaler_vector()
+    TestLib().test_scaler_matrix()
+    TestFeature().test_optimize_2nd_order_polynomial()
     print 'success'

@@ -51,7 +51,7 @@ class AbstractModel(object):
             score = self.cross_validate(train_data, cv_data, train_targets, cv_targets, params)
             self.logger.info("{0}: {1}".format(params, score))
             self.hyper_params_scores.append((params, score))
-        self.hyper_params = self._best_hyper_params()
+        self.hyper_params, self.best_score = self._best_hyper_params()
 
 
     def create_datasets(self, data, targets):
@@ -92,7 +92,7 @@ class AbstractModel(object):
             raise Exception('{0}.score_type not defined'.format(self.__class__.__name__))
         for params,score in self.hyper_params_scores:
             if score == best:
-                return params
+                return params, score
         raise Exception('best score not found')
  
 
