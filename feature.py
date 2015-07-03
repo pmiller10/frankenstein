@@ -1,14 +1,31 @@
+import logging
 from sklearn_wrapper import LinearRegressionModel
-from constants import ScoreType
+from constants import ScoreType, FeatureConstants
 import lib
 
 class Feature(object):
 
-    def __init__(self, score_type):
+    def __init__(self, score_type, log_level=logging.DEBUG):
         self.score_type = score_type
         self.polynomial = None
         self.tensor = None
         self.k_means = None
+
+        logger = logging.getLogger(self.__class__.__name__)
+        logger.setLevel(log_level)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+        fh = logging.FileHandler('log.txt')
+        fh.setLevel(log_level)
+        fh.setFormatter(formatter)
+
+        ch = logging.StreamHandler()
+        ch.setLevel(log_level)
+        ch.setFormatter(formatter)
+
+        logger.addHandler(fh)
+        logger.addHandler(ch)
+        self.logger = logger
 
 
     def optimize(self, data, targets):
@@ -16,17 +33,19 @@ class Feature(object):
         model.optimize(data, targets)
         best = model.best_score
         self.polynomial = 1
-        for p in range(1, 3):
+        for p in range(1, FeatureConstants.MAX_POLYNOMIAL + 1):
             new_data = lib.polynomial(data, p)
             model = LinearRegressionModel(ScoreType.MINIMIZE)
             model.optimize(new_data, targets)
-            new_best = model.best_score
+            self.logger.info("score={0} with polynomial {1}".format(model.best_score, p))
             if self.score_type == ScoreType.MINIMIZE:
                 if model.best_score < best:
                     self.polynomial = p
+                    best = model.best_score
             elif self.score_type == ScoreType.MAXIMIZE:
                 if model.best_score > best:
                     self.polynomial = p
+                    best = model.best_score
 
 
     def create_datasets(self, data, targets):  # TODO this is copy/pasted from sklearn_wrapper
