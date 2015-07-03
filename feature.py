@@ -11,6 +11,8 @@ class Feature(object):
         self.tensor = None
         self.k_means = None
 
+        # TODO this is adding multiple loggers to the handler
+        # check this with self.logger.handlers
         logger = logging.getLogger(self.__class__.__name__)
         logger.setLevel(log_level)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

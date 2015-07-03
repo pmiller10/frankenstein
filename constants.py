@@ -5,4 +5,4 @@ class ScoreType:
 
 class FeatureConstants:
 
-    MAX_POLYNOMIAL = 3
+    MAX_POLYNOMIAL = 5

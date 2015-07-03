@@ -72,8 +72,11 @@ class TestFeature():
 
         assert feature.polynomial == polynomial, "{0} != {1}".format(feature.polynomial, polynomial)
 
-    def test_optimize_2nd_order_polynomial(self):
+    def test_optimize_higher_order_polynomial(self):
         self._test_polynomial(2)
+        self._test_polynomial(3)
+        self._test_polynomial(4)
+        self._test_polynomial(5)
 
 
 
@@ -121,8 +124,6 @@ class TestLib():
         output = lib.scale(data)
         assert sum(sum(output)) == 0
 
-        
-
 
  
 if __name__ == "__main__":
@@ -134,5 +135,5 @@ if __name__ == "__main__":
     TestLib().test_norm_negatives()
     TestLib().test_scaler_vector()
     TestLib().test_scaler_matrix()
-    TestFeature().test_optimize_2nd_order_polynomial()
+    TestFeature().test_optimize_higher_order_polynomial()
     print 'success'
