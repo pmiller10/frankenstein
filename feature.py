@@ -31,13 +31,13 @@ class Feature(object):
 
 
     def optimize(self, data, targets):
-        model = LinearRegressionModel(Objective.MINIMIZE)
+        model = LinearRegressionModel(Objective.MINIMIZE, log_level=self.logger.level)
         model.optimize(data, targets)
         best = model.best_score
         self.polynomial = 1
         for p in range(1, FeatureConstants.MAX_POLYNOMIAL + 1):
             new_data = lib.polynomial(data, p)
-            model = LinearRegressionModel(Objective.MINIMIZE)
+            model = LinearRegressionModel(Objective.MINIMIZE, log_level=self.logger.level)
             model.optimize(new_data, targets)
             self.logger.info("score={0} with polynomial {1}".format(model.best_score, p))
             if self.score_type == Objective.MINIMIZE:

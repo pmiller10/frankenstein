@@ -67,7 +67,7 @@ class TestFeature():
         targets = [d**polynomial for d in data]
         data = [[d] for d in data]
 
-        feature = Feature(Objective.MINIMIZE)
+        feature = Feature(Objective.MINIMIZE, log_level=logging.WARN)
         feature.optimize(data, targets)
 
         assert feature.polynomial == polynomial, "{0} != {1}".format(feature.polynomial, polynomial)
