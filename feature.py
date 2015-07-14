@@ -1,6 +1,6 @@
 import logging
 from sklearn_wrapper import LinearRegressionModel
-from constants import ScoreType, FeatureConstants
+from constants import Objective, FeatureConstants
 import lib
 
 class Feature(object):
@@ -31,20 +31,20 @@ class Feature(object):
 
 
     def optimize(self, data, targets):
-        model = LinearRegressionModel(ScoreType.MINIMIZE)
+        model = LinearRegressionModel(Objective.MINIMIZE)
         model.optimize(data, targets)
         best = model.best_score
         self.polynomial = 1
         for p in range(1, FeatureConstants.MAX_POLYNOMIAL + 1):
             new_data = lib.polynomial(data, p)
-            model = LinearRegressionModel(ScoreType.MINIMIZE)
+            model = LinearRegressionModel(Objective.MINIMIZE)
             model.optimize(new_data, targets)
             self.logger.info("score={0} with polynomial {1}".format(model.best_score, p))
-            if self.score_type == ScoreType.MINIMIZE:
+            if self.score_type == Objective.MINIMIZE:
                 if model.best_score < best:
                     self.polynomial = p
                     best = model.best_score
-            elif self.score_type == ScoreType.MAXIMIZE:
+            elif self.score_type == Objective.MAXIMIZE:
                 if model.best_score > best:
                     self.polynomial = p
                     best = model.best_score

@@ -1,7 +1,7 @@
 from sklearn import datasets
 import logging
 from sklearn_wrapper import LogisticRegressionModel
-from constants import ScoreType
+from constants import Objective
 from feature import Feature
 import lib
 
@@ -10,7 +10,7 @@ import lib
 class TestModel():
 
     def test_score(self):
-        model = LogisticRegressionModel(ScoreType.MINIMIZE, log_level=logging.WARN)
+        model = LogisticRegressionModel(Objective.MINIMIZE, log_level=logging.WARN)
         preds, targets = range(10), range(10)
         score = model.score(preds, targets)
         assert(score == 1.)
@@ -25,7 +25,7 @@ class TestModel():
 
 
     def test_datasets(self):
-        model = LogisticRegressionModel(ScoreType.MINIMIZE, log_level=logging.WARN)
+        model = LogisticRegressionModel(Objective.MINIMIZE, log_level=logging.WARN)
         data = [[i] for i in range(10)]
         targets = range(10)
 
@@ -46,7 +46,7 @@ class TestModel():
 
 
     def test_optimize(self):
-        model = LogisticRegressionModel(ScoreType.MINIMIZE, log_level=logging.WARN)
+        model = LogisticRegressionModel(Objective.MINIMIZE, log_level=logging.WARN)
         assert(model.hyper_params == None)
         assert(model.hyper_params_scores == [])
 
@@ -67,7 +67,7 @@ class TestFeature():
         targets = [d**polynomial for d in data]
         data = [[d] for d in data]
 
-        feature = Feature(ScoreType.MINIMIZE)
+        feature = Feature(Objective.MINIMIZE)
         feature.optimize(data, targets)
 
         assert feature.polynomial == polynomial, "{0} != {1}".format(feature.polynomial, polynomial)

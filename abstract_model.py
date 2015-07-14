@@ -1,5 +1,5 @@
 import logging
-from constants import ScoreType
+from constants import Objective
 from collections import defaultdict
 
 class AbstractModel(object):
@@ -84,9 +84,9 @@ class AbstractModel(object):
 
     def _best_hyper_params(self):
         scores = [score for params,score in self.hyper_params_scores]
-        if self.score_type == ScoreType.MINIMIZE:
+        if self.score_type == Objective.MINIMIZE:
             best = min(scores)
-        elif self.score_type == ScoreType.MAXIMIZE:
+        elif self.score_type == Objective.MAXIMIZE:
             best = max(scores)
         else:
             raise Exception('{0}.score_type not defined'.format(self.__class__.__name__))
