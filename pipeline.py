@@ -25,7 +25,7 @@ class Pipeline(object):
         model.optimize(data, targets)
         best = model.best_score
         self.hyper_params = None
-        print model.best_score, 1
+        print 'score without transformation', model.best_score  # TODO logging
 
         # the transformer class should return a generator of modified datasets
         # test each one with the model, and if the performance is better, then
@@ -33,7 +33,7 @@ class Pipeline(object):
         for transformed, hyper_params in self.transformer().each_transformation(data, extra_data):
             model = self.model(self.objective, log_level=self.log_level)
             model.optimize(transformed, targets)
-            print model.best_score, hyper_params
+            print model.best_score, hyper_params  # TODO logging
 
             if self.objective == Objective.MINIMIZE:
                 if model.best_score < best:
@@ -47,4 +47,8 @@ class Pipeline(object):
 
 
     def transform(self, data):
-        return self.transformer().transform(data, **self.hyper_params)
+        if self.hyper_params:
+            return self.transformer().transform(data, **self.hyper_params)
+        else:
+            # TODO logger.warn('hyper_params set to None. Either you forgot to run .fit(), or .fit() found no improvement')
+            return data

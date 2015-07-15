@@ -101,22 +101,11 @@ class AbstractModel(object):
 class AbstractEnsemble(AbstractModel):
 
 
-    #def __init__(self, models, score_type, log_level=logging.DEBUG):
-        #self.models = models
-        #self.score_type = score_type
-        #super(self.__class__, self).__init__(log_level)
-
-    
     def optimize(self, data, targets):
         for model in self.models:
             model.optimize(data, targets)
 
     
-    #def _predict(self, data):
-        #preds = [m.predict(data) for m in self.models]
-        #return self._vote(preds) 
-
-
     def predict(self, data):
         preds = [m.predict(data) for m in self.models]
         number_of_models = range(len(self.models))
