@@ -4,7 +4,7 @@ from pipeline import Pipeline
 from preprocess import Polynomial
 from abstract_model import ClassifierEnsemble
 from sklearn_wrapper import  LinearRegressionModel, LogisticRegressionModel, SVCModel
-from submission import submission
+from score import score
 import logging
 
 
@@ -20,7 +20,7 @@ test_data, test_targets = Data.test()
 
 # feature engineering
 extra_data = test_data
-pipe = Pipeline(Polynomial, LogisticRegressionModel, objective, logging.WARN)
+pipe = Pipeline(Polynomial, SVCModel, objective, logging.WARN)
 pipe.fit(train_data, train_targets, extra_data)
 print pipe.hyper_params
 
@@ -33,4 +33,4 @@ model.fit(train_data, train_targets, model.hyper_params)
 # submission file
 test_data = pipe.transform(test_data)
 preds = model.predict(test_data)
-submission(preds)
+print score(preds, test_targets)
