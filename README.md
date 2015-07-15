@@ -1,10 +1,14 @@
 # autoML
 Data Science/Machine Learning Framework
 
-# MVP
+## MVP
 
-## Feature: Automate feature engineering
-Requirements:
+### MISC
+1. make .createdatasets() a shared function across the whole app
+2. make a score function shared across the whole app
+3. import logger rather than assigning it to each class
+
+### Feature: Automate feature engineering
 1. given data and targets, output function to generate features
 2. see if it does better with higher order polynomial
 3. see if it does better with tensor product
@@ -15,7 +19,7 @@ Requirements:
 8. FeatureValidator class, which accepts a dataset,
    an array of preprocessing functions to apply to it, and an algorithm to CV it with
 
-## Feature: More sklearn models
+### Feature: More sklearn models
 1. automate hyper param generator
 2. linear models
 3. RandomForest
@@ -23,25 +27,25 @@ Requirements:
 5. kNN
 6. SVM
 
-## Feature: Ensemble with configurable model
+### Feature: Ensemble with configurable model
 1. Ensemble class that takes a set of models to CV and another model to vote with their outputs
 
-## Feature: Controller
+### Feature: Controller
 Requirements:
 1. Accept a list of preprocessing steps to validate
 2. Accept a list of models to validate
 
-## Feature: Config/settings file
+### Feature: Config/settings file
 1. hyperparams should be configurable from this file
 
-## Feature: requirements.txt
+### Feature: requirements.txt
 1. put all requirments into this file
 
 
-# post version 1.0
+## post version 1.0
 
-## Feature: neural nets
+### Feature: neural nets
 
-## Feature: code generation
+### Feature: code generation
 
-## Feature: other libraries
+### Feature: other libraries
