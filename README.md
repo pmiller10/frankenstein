@@ -7,6 +7,7 @@ Data Science/Machine Learning Framework
 1. make .createdatasets() a shared function across the whole app
 2. make a score function shared across the whole app
 3. import logger rather than assigning it to each class
+4. requirements.txt
 
 ### Feature: Automate feature engineering
 1. given data and targets, output function to generate features
@@ -26,6 +27,7 @@ Data Science/Machine Learning Framework
 4. naive bayes
 5. kNN
 6. SVM
+7. xgboost
 
 ### Feature: Ensemble with configurable model
 1. Ensemble class that takes a set of models to CV and another model to vote with their outputs
@@ -38,8 +40,6 @@ Requirements:
 ### Feature: Config/settings file
 1. hyperparams should be configurable from this file
 
-### Feature: requirements.txt
-1. put all requirments into this file
 
 
 ## post version 1.0
