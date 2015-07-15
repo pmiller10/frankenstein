@@ -107,9 +107,8 @@ class AbstractEnsemble(AbstractModel):
 
     
     def optimize(self, data, targets):
-        for m in self.models:
-            print len(data)
-            m.optimize(data, targets)
+        for model in self.models:
+            model.optimize(data, targets)
 
     
     #def _predict(self, data):
@@ -134,9 +133,8 @@ class AbstractEnsemble(AbstractModel):
 
 
     def fit(self, data, targets, _):
-        for m in self.models:
-            print len(data)
-            m.fit(data, targets, m.hyper_params)
+        for model in self.models:
+            model.fit(data, targets, model.hyper_params)  # TODO is this the best way to store state?
 
 
 
@@ -144,8 +142,11 @@ class ClassifierEnsemble(AbstractEnsemble):
 
 
     def __init__(self, models, score_type, log_level=logging.DEBUG):
-        self.models = models  # TODO should you init the model classes here, rather than be passed the isntances?
         self.score_type = score_type
+        self.models = []
+        for model_class in models:
+            model = model_class(self.score_type, log_level)
+            self.models.append(model)
         super(self.__class__, self).__init__(log_level)
 
 
