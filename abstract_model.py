@@ -51,8 +51,8 @@ class AbstractModel(object):
             score = self.cross_validate(train_data, cv_data, train_targets, cv_targets, params)
             self.logger.debug("{0}: {1}".format(params, score))
             self.hyper_params_scores.append((params, score))
-        self.logger.info("best params {0}: {1}".format(params, score))
         self.hyper_params, self.best_score = self._best_hyper_params()
+        self.logger.info("best params {0}: {1}".format(self.hyper_params, self.best_score))
 
 
     def create_datasets(self, data, targets):
