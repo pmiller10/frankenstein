@@ -2,9 +2,10 @@ from constants import Objective
 from data import Data
 from pipeline import Pipeline
 from preprocess import Polynomial
-from abstract_model import AbstractEnsemble
+from abstract_model import ClassifierEnsemble
 from sklearn_wrapper import  LinearRegressionModel, LogisticRegressionModel, SVCModel
 from submission import submission
+import logging
 
 
 """
@@ -19,13 +20,15 @@ test_data, test_targets = Data.test()
 
 # feature engineering
 extra_data = test_data
-pipe = Pipeline([Polynomial, LogisticRegressionModel], objective)
+pipe = Pipeline(Polynomial, LogisticRegressionModel, objective, logging.WARN)
 pipe.fit(train_data, train_targets, extra_data)
+print pipe.hyper_params
 
 # train model
 train_data = pipe.transform(train_data)
-model = Ensemble([LogisticRegressionModel, SVCModel], objective)
-model.fit(train_data, train_targets)
+model = ClassifierEnsemble([LogisticRegressionModel, SVCModel], objective)
+model.optimize(train_data, train_targets)
+model.fit(train_data, train_targets, model.hyper_params)
 
 # submission file
 preds = model.predict(test_data)
