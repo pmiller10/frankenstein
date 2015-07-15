@@ -26,10 +26,11 @@ print pipe.hyper_params
 
 # train model
 train_data = pipe.transform(train_data)
-model = ClassifierEnsemble([LogisticRegressionModel, SVCModel], objective)
+model = ClassifierEnsemble([LogisticRegressionModel, SVCModel], objective, logging.INFO)
 model.optimize(train_data, train_targets)
 model.fit(train_data, train_targets, model.hyper_params)
 
 # submission file
+test_data = pipe.transform(test_data)
 preds = model.predict(test_data)
 submission(preds)
