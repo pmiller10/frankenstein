@@ -14,7 +14,7 @@ class Pipeline(object):
 
 
 
-    def fit(self, data, targets, extra_data=None):
+    def fit(self, data, targets, unsupervised_data=None):
         """
         Should accept a dataset and targets.
         Should set self.hyper_params
@@ -30,7 +30,7 @@ class Pipeline(object):
         # the transformer class should return a generator of modified datasets
         # test each one with the model, and if the performance is better, then
         # set the new best score to that performance
-        for transformed, hyper_params in self.transformer().each_transformation(data, extra_data):
+        for transformed, hyper_params in self.transformer().each_transformation(data, unsupervised_data):
             model = self.model(self.objective, log_level=self.log_level)
             model.optimize(transformed, targets)
             print model.best_score, hyper_params  # TODO logging

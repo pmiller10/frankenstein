@@ -90,12 +90,12 @@ class AbstractModel(object):
 
     def _best_hyper_params(self):
         scores = [score for params,score in self.hyper_params_scores]
-        if self.score_type == Objective.MINIMIZE:
+        if self.objective == Objective.MINIMIZE:
             best = min(scores)
-        elif self.score_type == Objective.MAXIMIZE:
+        elif self.objective == Objective.MAXIMIZE:
             best = max(scores)
         else:
-            raise Exception('{0}.score_type not defined'.format(self.__class__.__name__))
+            raise Exception('{0}.objective not defined'.format(self.__class__.__name__))
         for params,score in self.hyper_params_scores:
             if score == best:
                 return params, score
@@ -136,13 +136,13 @@ class AbstractEnsemble(AbstractModel):
 class ClassifierEnsemble(AbstractEnsemble):
 
 
-    def __init__(self, models, voter, score_type, log_level=logging.DEBUG):
+    def __init__(self, models, voter, objective, log_level=logging.DEBUG):
         """
         param :models is a list of FML models.
-        param :score_type is a constants.Objective constant
+        param :objective is a constants.Objective constant
         param :voter is a instance of a model to vote for the output
         """
-        self.score_type = score_type
+        self.objective = objective
         self.models = []
         self.voter = voter
         self.models = models

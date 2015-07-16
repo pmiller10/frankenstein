@@ -5,8 +5,8 @@ import lib
 
 class Feature(object):
 
-    def __init__(self, score_type, log_level=logging.DEBUG):
-        self.score_type = score_type
+    def __init__(self, objective, log_level=logging.DEBUG):
+        self.objective = objective
         self.polynomial = None
         self.tensor = None
         self.k_means = None
@@ -40,11 +40,11 @@ class Feature(object):
             model = LinearRegressionModel(Objective.MINIMIZE, log_level=self.logger.level)
             model.optimize(new_data, targets)
             self.logger.info("score={0} with polynomial {1}".format(model.best_score, p))
-            if self.score_type == Objective.MINIMIZE:
+            if self.objective == Objective.MINIMIZE:
                 if model.best_score < best:
                     self.polynomial = p
                     best = model.best_score
-            elif self.score_type == Objective.MAXIMIZE:
+            elif self.objective == Objective.MAXIMIZE:
                 if model.best_score > best:
                     self.polynomial = p
                     best = model.best_score

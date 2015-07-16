@@ -43,8 +43,8 @@ class LinearRegressionModel(SkLearnWrapper):
     """
 
 
-    def __init__(self, score_type, log_level=logging.DEBUG):
-        self.score_type = score_type
+    def __init__(self, objective, log_level=logging.DEBUG):
+        self.objective = objective
         super(self.__class__, self).__init__(log_level)
 
 
@@ -69,8 +69,8 @@ class LogisticRegressionModel(SkLearnWrapper):
         verbose=0)
     """
 
-    def __init__(self, score_type, log_level=logging.DEBUG):
-        self.score_type = score_type
+    def __init__(self, objective, log_level=logging.DEBUG):
+        self.objective = objective
         super(self.__class__, self).__init__(log_level)
 
 
@@ -101,8 +101,8 @@ class SVCModel(SkLearnWrapper):
     """
 
 
-    def __init__(self, score_type, log_level=logging.DEBUG):
-        self.score_type = score_type
+    def __init__(self, objective, log_level=logging.DEBUG):
+        self.objective = objective
         super(self.__class__, self).__init__(log_level)
 
 

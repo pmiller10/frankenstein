@@ -11,6 +11,12 @@ Data Science/Machine Learning Framework
 5. make .createdatasets() a shared function across the whole app
 6. make a score function shared across the whole app
 
+### Feature: Ensemble with configurable model (DONE)
+1. Ensemble class that takes a set of models to CV and another model to vote with their outputs
+
+### Feature: Config/settings file (DONE)
+1. hyperparams should be configurable from this file
+
 ### Feature: Automate feature engineering
 1. given data and targets, output function to generate features
 2. see if it does better with higher order polynomial
@@ -31,16 +37,6 @@ Data Science/Machine Learning Framework
 6. SVM
 7. xgboost
 
-### Feature: Ensemble with configurable model
-1. Ensemble class that takes a set of models to CV and another model to vote with their outputs
-
-### Feature: Controller
-Requirements:
-1. Accept a list of preprocessing steps to validate
-2. Accept a list of models to validate
-
-### Feature: Config/settings file
-1. hyperparams should be configurable from this file
 
 
 
