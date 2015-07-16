@@ -144,10 +144,8 @@ class ClassifierEnsemble(AbstractEnsemble):
         """
         self.score_type = score_type
         self.models = []
-        self.voter = voter(score_type, log_level)
-        for model_class in models:
-            model = model_class(self.score_type, log_level)
-            self.models.append(model)
+        self.voter = voter
+        self.models = models
         super(self.__class__, self).__init__(log_level)
 
 
@@ -167,6 +165,11 @@ class ClassifierEnsemble(AbstractEnsemble):
     def predict(self, data):
         meta_features = self._meta_features(data)
         return self.voter.predict(meta_features)
+
+
+    def predict_proba(self, data):
+        meta_features = self._meta_features(data)
+        return self.voter.predict_proba(meta_features)
     
 
     def _meta_features(self, data):

@@ -20,18 +20,24 @@ test_data, test_targets = Data.test()
 
 # feature engineering
 extra_data = test_data
-pipe = Pipeline(Polynomial, SVCModel, objective, logging.WARN)
+pipe = Pipeline(Polynomial, LogisticRegressionModel, objective, logging.WARN)
 pipe.fit(train_data, train_targets, extra_data)
 print pipe.hyper_params
 
 # train model
 train_data = pipe.transform(train_data)
-voter = LogisticRegressionModel
-model = ClassifierEnsemble([LogisticRegressionModel, SVCModel], voter, objective, logging.INFO)
-model.optimize(train_data, train_targets)
-model.fit(train_data, train_targets, model.hyper_params)
+
+voter1 = LogisticRegressionModel(objective, logging.INFO)
+models = [m(objective, logging.INFO) for m in [SVCModel, LogisticRegressionModel]]
+ensemble = ClassifierEnsemble(models, voter1, objective, logging.INFO)
+
+voter2 = LogisticRegressionModel(objective, logging.INFO)
+master = ClassifierEnsemble([ensemble], voter2, objective, logging.INFO)
+
+master.optimize(train_data, train_targets)
+master.fit(train_data, train_targets, master.hyper_params)
 
 # submission file
 test_data = pipe.transform(test_data)
-preds = model.predict(test_data)
+preds = master.predict(test_data)
 print score(preds, test_targets)
