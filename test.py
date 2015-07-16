@@ -4,6 +4,7 @@ from sklearn_wrapper import LogisticRegressionModel
 from constants import Objective
 from feature import Feature
 import lib
+import random
 
 
 
@@ -72,11 +73,33 @@ class TestFeature():
 
         assert feature.polynomial == polynomial, "{0} != {1}".format(feature.polynomial, polynomial)
 
+
     def test_optimize_higher_order_polynomial(self):
         self._test_polynomial(2)
         self._test_polynomial(3)
         self._test_polynomial(4)
         self._test_polynomial(5)
+
+
+    def test_optimize_k_means_with_xor(self):
+        data, targets = [], []
+        for i in range(100):
+            a, b = random.randint(0, 1), random.randint(0, 1)
+            if (a or b) and not (a and b):
+                y = 1
+            else:
+                y = 0
+            data.append([float(a),float(b)])
+            targets.append(y)
+
+        feature = Feature(Objective.MAXIMIZE)#, log_level=logging.WARN)
+        feature.optimize(data, targets)
+
+        assert feature.k_means == 2
+         
+
+
+        
 
 
 
@@ -125,15 +148,32 @@ class TestLib():
         assert sum(sum(output)) == 0
 
 
+    def test_k_means(self):
+        data = []
+        for i in range(5):
+            data.append([0.])
+        for i in range(5):
+            data.append([1.])
+
+        output = lib.k_means(data, 2)
+
+        assert len(output) == 10
+        assert output[0][1] == output[1][1] 
+        assert output[0][1] != output[-1][1] 
+
+
+
  
 if __name__ == "__main__":
-    TestModel().test_score()
-    TestModel().test_datasets()
-    TestModel().test_optimize()
-    TestLib().test_polynomial()
-    TestLib().test_norm_positives()
-    TestLib().test_norm_negatives()
-    TestLib().test_scaler_vector()
-    TestLib().test_scaler_matrix()
-    TestFeature().test_optimize_higher_order_polynomial()
+    #TestModel().test_score()
+    #TestModel().test_datasets()
+    #TestModel().test_optimize()
+    #TestLib().test_polynomial()
+    #TestLib().test_norm_positives()
+    #TestLib().test_norm_negatives()
+    #TestLib().test_scaler_vector()
+    #TestLib().test_scaler_matrix()
+    #TestLib().test_k_means()
+    TestFeature().test_optimize_k_means_with_xor()
+    #TestFeature().test_optimize_higher_order_polynomial()
     print 'success'
