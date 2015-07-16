@@ -1,13 +1,15 @@
 # autoML
 Data Science/Machine Learning Framework
 
-## MVP
+## Version 1.0
 
 ### MISC
-1. make .createdatasets() a shared function across the whole app
-2. make a score function shared across the whole app
+1. Fork class to send data to multiple models
+2. Make Pipeline instances embeddable/chainable
 3. import logger rather than assigning it to each class
 4. requirements.txt
+5. make .createdatasets() a shared function across the whole app
+6. make a score function shared across the whole app
 
 ### Feature: Automate feature engineering
 1. given data and targets, output function to generate features
