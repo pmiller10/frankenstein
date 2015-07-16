@@ -1,6 +1,7 @@
 import logging
 from constants import Objective
 from collections import defaultdict
+import numpy
 
 class AbstractModel(object):
 
@@ -42,6 +43,10 @@ class AbstractModel(object):
         """
         param data: a list representing a single observation
         """
+        raise NotImplementedError
+    
+
+    def predict_proba(self, data):
         raise NotImplementedError
 
 
@@ -131,20 +136,50 @@ class AbstractEnsemble(AbstractModel):
 class ClassifierEnsemble(AbstractEnsemble):
 
 
-    def __init__(self, models, score_type, log_level=logging.DEBUG):
+    def __init__(self, models, voter, score_type, log_level=logging.DEBUG):
+        """
+        param :models is a list of FML models.
+        param :score_type is a constants.Objective constant
+        param :voter is a instance of a model to vote for the output
+        """
         self.score_type = score_type
         self.models = []
+        self.voter = voter(score_type, log_level)
         for model_class in models:
             model = model_class(self.score_type, log_level)
             self.models.append(model)
         super(self.__class__, self).__init__(log_level)
 
 
-    def _vote(self, preds):
-        votes = defaultdict(int)
-        for p in preds:
-            votes[p] += 1
-        most_votes = max(votes.values())
-        for klass,vote_count in votes.items():
-            if vote_count == most_votes:
-                return klass
+    def fit(self, data, targets, _):
+        """
+        param :data should be a list of lists
+        """
+        for model in self.models:
+            model.fit(data, targets, model.hyper_params)  # TODO split into CV set?
+
+        preds = [m.predict_proba(data) for m in self.models]
+        meta_features = self._meta_features(data)
+        self.voter.optimize(meta_features, targets)
+        self.voter.fit(meta_features, targets, {})
+
+
+    def predict(self, data):
+        meta_features = self._meta_features(data)
+        return self.voter.predict(meta_features)
+    
+
+    def _meta_features(self, data):
+        preds = [m.predict_proba(data) for m in self.models]
+        meta_features = []
+        number_of_models = range(len(self.models))
+        number_of_preds = range(len(data))
+        for j in number_of_preds:
+            d = data[j]
+            preds_for_one = [preds[i][j] for i in number_of_models]
+            preds_for_one = numpy.concatenate(preds_for_one, axis=0)
+            preds_for_one = preds_for_one.flatten() 
+            d = d.flatten()
+            preds_for_one = numpy.concatenate((preds_for_one, d), axis=0)
+            meta_features.append(preds_for_one)
+        return meta_features

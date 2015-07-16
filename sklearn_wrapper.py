@@ -8,13 +8,21 @@ class SkLearnWrapper(AbstractModel):
 
 
     def fit(self, data, targets, hyper_params):
-        self.model.set_params(**hyper_params)
+        if hyper_params:
+            self.model.set_params(**hyper_params)
+        if not self.model:
+            self.logger.error('No model assigned')
+            raise Exception('No model')
         self.model.fit(data, targets)
 
 
     def _predict(self, data):
         preds = self.model.predict(data)
         return preds[0]
+
+
+    def predict_proba(self, data):
+        return [self.model.predict_proba(d) for d in data]
 
 
     def score(self, preds, targets):
@@ -110,5 +118,5 @@ class SVCModel(SkLearnWrapper):
         for c in costs:
             for d in degree:
                 for tol in tolerance:
-                    params.append({'C': c, 'tol': tol, 'degree': d})
+                    params.append({'C': c, 'tol': tol, 'degree': d, 'probability': True})
         return params
