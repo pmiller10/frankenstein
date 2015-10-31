@@ -44,7 +44,7 @@ class AbstractModel(object):
         param data: a list representing a single observation
         """
         raise NotImplementedError
-    
+
 
     def predict_proba(self, data):
         raise NotImplementedError
@@ -100,7 +100,7 @@ class AbstractModel(object):
             if score == best:
                 return params, score
         raise Exception('best score not found')
- 
+
 
 
 class AbstractEnsemble(AbstractModel):
@@ -110,7 +110,7 @@ class AbstractEnsemble(AbstractModel):
         for model in self.models:
             model.optimize(data, targets)
 
-    
+
     def predict(self, data):
         preds = [m.predict(data) for m in self.models]
         number_of_models = range(len(self.models))
@@ -118,7 +118,7 @@ class AbstractEnsemble(AbstractModel):
         weighted_preds = []
         for i in number_of_preds:
             preds_for_one = [preds[j][i] for j in number_of_models]
-            weighted_pred = self._vote(preds_for_one) 
+            weighted_pred = self._vote(preds_for_one)
             weighted_preds.append(weighted_pred)
         return weighted_preds
 
@@ -170,7 +170,7 @@ class ClassifierEnsemble(AbstractEnsemble):
     def predict_proba(self, data):
         meta_features = self._meta_features(data)
         return self.voter.predict_proba(meta_features)
-    
+
 
     def _meta_features(self, data):
         preds = [m.predict_proba(data) for m in self.models]
@@ -181,7 +181,7 @@ class ClassifierEnsemble(AbstractEnsemble):
             d = data[j]
             preds_for_one = [preds[i][j] for i in number_of_models]
             preds_for_one = numpy.concatenate(preds_for_one, axis=0)
-            preds_for_one = preds_for_one.flatten() 
+            preds_for_one = preds_for_one.flatten()
             d = d.flatten()
             preds_for_one = numpy.concatenate((preds_for_one, d), axis=0)
             meta_features.append(preds_for_one)
