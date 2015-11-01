@@ -10,15 +10,19 @@ class AbstractModel(object):
         self.hyper_params = None
         self.hyper_params_scores = list()
 
-        logger = logging.getLogger(self.__class__.__name__)
+        name = self.__class__.__name__ + ":" + str(id(self))
+        logger = logging.getLogger(name)
         logger.setLevel(log_level)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        msg = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        formatter = logging.Formatter(msg)
 
         fh = logging.FileHandler('log.txt')
+        fh.set_name(self.__class__.__name__)
         fh.setLevel(log_level)
         fh.setFormatter(formatter)
 
         ch = logging.StreamHandler()
+        ch.set_name(self.__class__.__name__)
         ch.setLevel(log_level)
         ch.setFormatter(formatter)
 
