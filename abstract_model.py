@@ -162,6 +162,7 @@ class ClassifierEnsemble(AbstractEnsemble):
 
         preds = [m.predict_proba(data) for m in self.models]
         meta_features = self._meta_features(data)
+        self.logger.info('Optimizing voter')
         self.voter.optimize(meta_features, targets)
         self.voter.fit(meta_features, targets, {})
 
@@ -181,12 +182,14 @@ class ClassifierEnsemble(AbstractEnsemble):
         meta_features = []
         number_of_models = range(len(self.models))
         number_of_preds = range(len(data))
+        # TODO needs comments. what does this method even do?
         for j in number_of_preds:
             d = data[j]
             preds_for_one = [preds[i][j] for i in number_of_models]
             preds_for_one = numpy.concatenate(preds_for_one, axis=0)
             preds_for_one = preds_for_one.flatten()
-            d = d.flatten()
+            if hasattr(d, 'flatten'):  # check if data is numpy or list
+                d = d.flatten()
             preds_for_one = numpy.concatenate((preds_for_one, d), axis=0)
             meta_features.append(preds_for_one)
         return meta_features
