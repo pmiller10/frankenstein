@@ -110,31 +110,70 @@ class AbstractModel(object):
 class AbstractEnsemble(AbstractModel):
 
 
+    def predict(self, data):
+        meta_features = self._meta_features(data)
+        return self.voter.predict(meta_features)
+
+
     def optimize(self, data, targets):
         for model in self.models:
             model.optimize(data, targets)
 
 
-    def predict(self, data):
+    def fit(self, data, targets, _):
+        """
+        param :data should be a list of lists
+        """
+        for model in self.models:
+            model.fit(data, targets, model.hyper_params)  # TODO split into CV set?
+
+        if self.__class__.__name__ == 'RegressionEnsemble':
+            preds = [m.predict(data) for m in self.models]
+        elif self.__class__.__name__ == 'ClassifierEnsemble':
+            preds = [m.predict_proba(data) for m in self.models]
+        else:
+            msg = 'Unknown Ensemble class: {0}'.format(self.__class__)
+            raise Exception(msg)
+
+        meta_features = self._meta_features(data)
+        self.logger.info('Optimizing voter')
+        self.voter.optimize(meta_features, targets)
+        self.voter.fit(meta_features, targets, {})
+
+
+class RegressionEnsemble(AbstractEnsemble):
+
+    def __init__(self, models, voter, objective, log_level=logging.DEBUG):
+        """
+        param :models is a list of FML models.
+        param :objective is a constants.Objective constant
+        param :voter is a instance of a model to vote for the output
+        """
+        self.objective = objective
+        self.models = []
+        self.voter = voter
+        self.models = models
+        super(self.__class__, self).__init__(log_level)
+
+
+    def _meta_features(self, data):
+        """
+        Iterates over the models in the ensemble and returns a list
+        of predictions. These are used as input features to the voter.
+        """
         preds = [m.predict(data) for m in self.models]
+        meta_features = []
         number_of_models = range(len(self.models))
         number_of_preds = range(len(data))
-        weighted_preds = []
-        for i in number_of_preds:
-            preds_for_one = [preds[j][i] for j in number_of_models]
-            weighted_pred = self._vote(preds_for_one)
-            weighted_preds.append(weighted_pred)
-        return weighted_preds
-
-
-    def _vote(self, preds):
-        return NotImplementedError
-
-
-    def fit(self, data, targets, _):
-        for model in self.models:
-            model.fit(data, targets, model.hyper_params)  # TODO is this the best way to store state?
-
+        # iterate over predictions to create list of lists,
+        # where each sublist is for one particular input
+        for j in number_of_preds:
+            d = data[j]
+            preds_for_one = [preds[i][j] for i in number_of_models]
+            meta_features.append(preds_for_one)
+        # TODO this returns list of lists, but
+        # ClassifierEnsemble._meta_features returns list of numpy arrays
+        return meta_features
 
 
 class ClassifierEnsemble(AbstractEnsemble):
@@ -153,36 +192,22 @@ class ClassifierEnsemble(AbstractEnsemble):
         super(self.__class__, self).__init__(log_level)
 
 
-    def fit(self, data, targets, _):
-        """
-        param :data should be a list of lists
-        """
-        for model in self.models:
-            model.fit(data, targets, model.hyper_params)  # TODO split into CV set?
-
-        preds = [m.predict_proba(data) for m in self.models]
-        meta_features = self._meta_features(data)
-        self.logger.info('Optimizing voter')
-        self.voter.optimize(meta_features, targets)
-        self.voter.fit(meta_features, targets, {})
-
-
-    def predict(self, data):
-        meta_features = self._meta_features(data)
-        return self.voter.predict(meta_features)
-
-
     def predict_proba(self, data):
         meta_features = self._meta_features(data)
         return self.voter.predict_proba(meta_features)
 
 
     def _meta_features(self, data):
+        """
+        Iterates over the models in the ensemble and returns a list
+        of predictions. These are used as input features to the voter.
+        """
         preds = [m.predict_proba(data) for m in self.models]
         meta_features = []
         number_of_models = range(len(self.models))
         number_of_preds = range(len(data))
-        # TODO needs comments. what does this method even do?
+        # iterate over predictions to create list of arrays,
+        # where each array is for one particular input
         for j in number_of_preds:
             d = data[j]
             preds_for_one = [preds[i][j] for i in number_of_models]
