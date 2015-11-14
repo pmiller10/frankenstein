@@ -43,8 +43,8 @@ class LinearRegressionModel(SkLearnWrapper):
         super(self.__class__, self).__init__(log_level)
 
 
-    def _initialize_model(self):  # TODO needs testing
-        self.model = LinearRegression()
+    def _initialize_model(self, hyper_params):  # TODO needs testing
+        self.model = LinearRegression(**hyper_params)
 
 
     def _possible_hyper_params(self):
@@ -65,8 +65,8 @@ class LogisticRegressionModel(SkLearnWrapper):
         super(self.__class__, self).__init__(log_level)
 
 
-    def _initialize_model(self):
-        self.model = LogisticRegression()
+    def _initialize_model(self, hyper_params):
+        self.model = LogisticRegression(**hyper_params)
 
 
     def _possible_hyper_params(self):
@@ -97,8 +97,8 @@ class SVCModel(SkLearnWrapper):
         super(self.__class__, self).__init__(log_level)
 
 
-    def _initialize_model(self):
-        self.model = SVC()
+    def _initialize_model(self, hyper_params):
+        self.model = SVC(**hyper_params)
 
 
     def _possible_hyper_params(self):

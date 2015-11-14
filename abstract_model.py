@@ -72,17 +72,17 @@ class AbstractModel(object):
 
 
     def cross_validate(self, train_data, cv_data, train_targets, cv_targets, hyper_params):
-        self._initialize_model()
+        self._initialize_model(hyper_params)
         self.fit(train_data, train_targets, hyper_params)
         preds = self.predict(cv_data)
         return self._score(preds, cv_targets)
 
 
-    def _initialize_model(self):
+    def _initialize_model(self, hyper_params):
         """
         This should initialize the weights of the model in place.
         For example,
-        self.model = sklearn.linear_model.LogisticRegression()
+        self.model = sklearn.linear_model.LogisticRegression(**hyper_params)
         """
         raise NotImplementedError
 
