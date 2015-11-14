@@ -1,7 +1,10 @@
 import logging
-from constants import Objective
 from collections import defaultdict
 import numpy
+from constants import Objective
+from config import Config
+
+
 
 class AbstractModel(object):
 
@@ -72,7 +75,7 @@ class AbstractModel(object):
         self._initialize_model()
         self.fit(train_data, train_targets, hyper_params)
         preds = self.predict(cv_data)
-        return self.score(preds, cv_targets)
+        return self._score(preds, cv_targets)
 
 
     def _initialize_model(self):
@@ -84,8 +87,8 @@ class AbstractModel(object):
         raise NotImplementedError
 
 
-    def score(self, preds, targets):
-        raise NotImplementedError
+    def _score(self, preds, targets):
+        return Config.loss(preds, targets)
 
 
     def _possible_hyper_params(self):

@@ -2,7 +2,6 @@ from abstract_model import AbstractModel
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.svm import SVC
 import logging
-from sklearn.metrics import accuracy_score, mean_absolute_error
 
 class SkLearnWrapper(AbstractModel):
 
@@ -23,10 +22,6 @@ class SkLearnWrapper(AbstractModel):
 
     def predict_proba(self, data):
         return [self.model.predict_proba(d) for d in data]
-
-
-    def score(self, preds, targets):
-        return accuracy_score(targets, preds)
 
 
     def create_datasets(self, data, targets):
@@ -56,10 +51,6 @@ class LinearRegressionModel(SkLearnWrapper):
         return [{'normalize': True}, {'normalize': False}]
 
 
-    def score(self, preds, targets):
-        return mean_absolute_error(targets, preds)
-
-
 class LogisticRegressionModel(SkLearnWrapper):
 
     """
@@ -82,7 +73,7 @@ class LogisticRegressionModel(SkLearnWrapper):
         params = []
         for penalty in ['l1', 'l2']:
             for i in range(5):
-                c = (i * 2) + 1 
+                c = (i * 2) + 1
                 for j in [1., 0.2, 0.1, 0.01, 0.001, 0.0001, 0.00001]:
                     tol = j
                     params.append({'C': c, 'tol': tol, 'penalty': penalty})
