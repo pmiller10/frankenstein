@@ -3,6 +3,9 @@ from sklearn.metrics import accuracy_score
 class DefaultConfig():
 
 
+    epochs = 10  # number of variations to cross validate per model
+
+
     class Polynomial():
 
         START = 2

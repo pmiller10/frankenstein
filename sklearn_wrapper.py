@@ -40,15 +40,13 @@ class LinearRegressionModel(SkLearnWrapper):
 
     def __init__(self, objective, log_level=logging.DEBUG):
         self.objective = objective
+        self.klass = LinearRegression
         super(self.__class__, self).__init__(log_level)
 
 
     def _initialize_model(self, hyper_params):  # TODO needs testing
         self.model = LinearRegression(**hyper_params)
 
-
-    def _possible_hyper_params(self):
-        return [{'normalize': True}, {'normalize': False}]
 
 
 class LogisticRegressionModel(SkLearnWrapper):
@@ -62,22 +60,12 @@ class LogisticRegressionModel(SkLearnWrapper):
 
     def __init__(self, objective, log_level=logging.DEBUG):
         self.objective = objective
+        self.klass = LogisticRegression
         super(self.__class__, self).__init__(log_level)
 
 
     def _initialize_model(self, hyper_params):
         self.model = LogisticRegression(**hyper_params)
-
-
-    def _possible_hyper_params(self):
-        params = []
-        for penalty in ['l1', 'l2']:
-            for i in range(5):
-                c = (i * 2) + 1
-                for j in [1., 0.2, 0.1, 0.01, 0.001, 0.0001, 0.00001]:
-                    tol = j
-                    params.append({'C': c, 'tol': tol, 'penalty': penalty})
-        return params
 
 
 
@@ -94,20 +82,9 @@ class SVCModel(SkLearnWrapper):
 
     def __init__(self, objective, log_level=logging.DEBUG):
         self.objective = objective
+        self.klass = SVC
         super(self.__class__, self).__init__(log_level)
 
 
     def _initialize_model(self, hyper_params):
         self.model = SVC(**hyper_params)
-
-
-    def _possible_hyper_params(self):
-        params = []
-        costs = [(i + 1.) for i in range(10)]
-        degree = [i for i in range(5)]
-        tolerance = [.1 ** i for i in range(5)]
-        for c in costs:
-            for d in degree:
-                for tol in tolerance:
-                    params.append({'C': c, 'tol': tol, 'degree': d, 'probability': True})
-        return params
