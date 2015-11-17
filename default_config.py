@@ -1,5 +1,3 @@
-from sklearn.metrics import accuracy_score
-
 class DefaultConfig():
 
 
@@ -14,5 +12,4 @@ class DefaultConfig():
 
     @classmethod
     def loss(cls, preds, targets):
-        #return accuracy_score(targets, preds)
         return sum([(p-t)**2 for p,t in zip(preds, targets)])

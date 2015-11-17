@@ -121,6 +121,7 @@ class AbstractEnsemble(AbstractModel):
             model.optimize(data, targets)
 
 
+    # TODO remove the _ param
     def fit(self, data, targets, _):
         """
         param :data should be a list of lists
