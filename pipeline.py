@@ -25,6 +25,28 @@ class Pipeline(object):
         self.objective = objective
         self.log_level = log_level
 
+        # set up logger
+        name = self.__class__.__name__ + ":" + str(id(self))
+        logger = logging.getLogger(name)
+        logger.setLevel(log_level)
+        msg = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        formatter = logging.Formatter(msg)
+
+        fh = logging.FileHandler('log.txt')
+        fh.set_name(self.__class__.__name__)
+        fh.setLevel(log_level)
+        fh.setFormatter(formatter)
+
+        ch = logging.StreamHandler()
+        ch.set_name(self.__class__.__name__)
+        ch.setLevel(log_level)
+        ch.setFormatter(formatter)
+
+        logger.addHandler(fh)
+        logger.addHandler(ch)
+        self.logger = logger
+
+
 
     def fit(self, data, targets, unsupervised_data=None):
         """
@@ -37,7 +59,7 @@ class Pipeline(object):
         model.optimize(data, targets)
         best = model.best_score
         self.hyper_params = None
-        print 'score without transformation', model.best_score  # TODO logging
+        self.logger.info('Score without transformation = {0}'.format(model.best_score))
 
         # the transformer class should return a generator of modified datasets
         # test each one with the model, and if the performance is better, then
@@ -45,7 +67,7 @@ class Pipeline(object):
         for transformed, hyper_params in self.transformer().each_transformation(data, unsupervised_data):
             model = self.model_klass(**self.model_params)
             model.optimize(transformed, targets)
-            print model.best_score, hyper_params  # TODO logging
+            self.logger.info("Best score with {0} = {1}".format(hyper_params, model.best_score))
 
             if self.objective == Objective.MINIMIZE:
                 if model.best_score < best:
@@ -62,5 +84,5 @@ class Pipeline(object):
         if self.hyper_params:
             return self.transformer().transform(data, **self.hyper_params)
         else:
-            # TODO logger.warn('hyper_params set to None. Either you forgot to run .fit(), or .fit() found no improvement')
+            self.logger.warn('hyper_params set to None. Either you forgot to run .fit(), or .fit() found no improvement')
             return data

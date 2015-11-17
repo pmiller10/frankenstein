@@ -40,10 +40,12 @@ class StrGen():
 # TODO add limits from config.py
 # TODO add another level for model-specific limits
 param_limits = {
-                'C': IntGen(1, 10),
+                'C': FloatGen(0.1, 10.),
                 'tol': FloatGen(0.0001, 1.),
                 'penalty': StrGen(['l1', 'l2']),
-                'degree': IntGen(1, 5)
+                'degree': IntGen(1, 5),
+                'alpha': FloatGen(0.1, 10.),
+                'kernel': StrGen(['linear', 'rbf', 'sigmoid'])  # TODO why does 'polynomial' generate error?
                }
 
 def generate(klass):

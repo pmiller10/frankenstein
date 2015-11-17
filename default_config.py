@@ -7,7 +7,7 @@ class DefaultConfig():
     class Polynomial():
 
         START = 2
-        STOP = 2
+        STOP = 5
 
 
     @classmethod
