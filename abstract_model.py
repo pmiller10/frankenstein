@@ -1,7 +1,11 @@
 import logging
-from constants import Objective
 from collections import defaultdict
 import numpy
+from constants import Objective
+from config import Config
+import hyper_params_generator
+
+
 
 class AbstractModel(object):
 
@@ -56,12 +60,13 @@ class AbstractModel(object):
 
     def optimize(self, data, targets):
         train_data, cv_data, train_targets, cv_targets = self.create_datasets(data, targets)
-        for params in self._possible_hyper_params():
+        for i in range(Config.epochs):
+            params = hyper_params_generator.generate(self.klass)
             score = self.cross_validate(train_data, cv_data, train_targets, cv_targets, params)
-            self.logger.debug("{0}: {1}".format(params, score))
+            self.logger.debug("Epoch {0} score = {1}. Hyperparams: {2}".format(i, score, params))
             self.hyper_params_scores.append((params, score))
         self.hyper_params, self.best_score = self._best_hyper_params()
-        self.logger.info("best params {0}: {1}".format(self.hyper_params, self.best_score))
+        self.logger.info("Best score = {0}. Hyperparams: {1}\n".format(self.best_score, self.hyper_params))
 
 
     def create_datasets(self, data, targets):
@@ -69,27 +74,23 @@ class AbstractModel(object):
 
 
     def cross_validate(self, train_data, cv_data, train_targets, cv_targets, hyper_params):
-        self._initialize_model()
+        self._initialize_model(hyper_params)
         self.fit(train_data, train_targets, hyper_params)
         preds = self.predict(cv_data)
-        return self.score(preds, cv_targets)
+        return self._score(preds, cv_targets)
 
 
-    def _initialize_model(self):
+    def _initialize_model(self, hyper_params):
         """
         This should initialize the weights of the model in place.
         For example,
-        self.model = sklearn.linear_model.LogisticRegression()
+        self.model = sklearn.linear_model.LogisticRegression(**hyper_params)
         """
         raise NotImplementedError
 
 
-    def score(self, preds, targets):
-        raise NotImplementedError
-
-
-    def _possible_hyper_params(self):
-        raise NotImplementedError
+    def _score(self, preds, targets):
+        return Config.loss(preds, targets)
 
 
     def _best_hyper_params(self):
@@ -120,6 +121,7 @@ class AbstractEnsemble(AbstractModel):
             model.optimize(data, targets)
 
 
+    # TODO remove the _ param
     def fit(self, data, targets, _):
         """
         param :data should be a list of lists

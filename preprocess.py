@@ -1,5 +1,7 @@
 import lib
-import config
+from config import Config
+
+
 
 class Preprocess(object):
 
@@ -21,5 +23,5 @@ class Polynomial(Preprocess):
 
 
     def each_transformation(self, dataset, _):
-        for exponent in range(config.Polynomial.START, config.Polynomial.STOP):
+        for exponent in range(Config.Polynomial.START, Config.Polynomial.STOP):
             yield self.transform(dataset, exponent), {'exponent': exponent}
