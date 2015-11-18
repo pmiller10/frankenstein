@@ -1,5 +1,5 @@
 import lib
-from config import Config
+from _globals import Config
 
 
 

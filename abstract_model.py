@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 import numpy
 from constants import Objective
-from config import Config
+from _globals import Config
 import hyper_params_generator
 
 
