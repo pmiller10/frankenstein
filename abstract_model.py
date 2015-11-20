@@ -106,9 +106,10 @@ class AbstractModel(object):
 
     def _best_hyper_params(self):
         scores = [score for params,score in self.hyper_params_scores]
-        if self.objective == Objective.MINIMIZE:
+        objective = Config.objective
+        if objective == Objective.MINIMIZE:
             best = min(scores)
-        elif self.objective == Objective.MAXIMIZE:
+        elif objective == Objective.MAXIMIZE:
             best = max(scores)
         else:
             raise Exception('{0}.objective not defined'.format(self.__class__.__name__))
@@ -156,13 +157,11 @@ class AbstractEnsemble(AbstractModel):
 
 class RegressionEnsemble(AbstractEnsemble):
 
-    def __init__(self, models, voter, objective, log_level=logging.DEBUG):
+    def __init__(self, models, voter, log_level=logging.DEBUG):
         """
         param :models is a list of FML models.
-        param :objective is a constants.Objective constant
         param :voter is a instance of a model to vote for the output
         """
-        self.objective = objective
         self.models = []
         self.voter = voter
         self.models = models
@@ -192,13 +191,11 @@ class RegressionEnsemble(AbstractEnsemble):
 class ClassifierEnsemble(AbstractEnsemble):
 
 
-    def __init__(self, models, voter, objective, log_level=logging.DEBUG):
+    def __init__(self, models, voter, log_level=logging.DEBUG):
         """
         param :models is a list of FML models.
-        param :objective is a constants.Objective constant
         param :voter is a instance of a model to vote for the output
         """
-        self.objective = objective
         self.models = []
         self.voter = voter
         self.models = models

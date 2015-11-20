@@ -1,12 +1,13 @@
 import logging
 from constants import Objective
+from _globals import Config
 
 
 
 class Pipeline(object):
 
 
-    def __init__(self, transformer, model_klass, model_params, objective, log_level=logging.DEBUG):
+    def __init__(self, transformer, model_klass, model_params, log_level=logging.DEBUG):
         """
         The transformer should be a Preprocess class.
         The model_klass should be the class of the model.
@@ -14,15 +15,12 @@ class Pipeline(object):
         """
         # populate the model params with the Pipeline params
         # unless they're otherwise defined
-        if 'objective' not in model_params:
-            model_params['objective'] = objective
         if 'log_level' not in model_params:
             model_params['log_level'] = log_level
 
         self.transformer = transformer
         self.model_klass = model_klass
         self.model_params = model_params
-        self.objective = objective
         self.log_level = log_level
 
         # set up logger
@@ -69,11 +67,12 @@ class Pipeline(object):
             model.optimize(transformed, targets)
             self.logger.info("Best score with {0} = {1}".format(hyper_params, model.best_score))
 
-            if self.objective == Objective.MINIMIZE:
+            objective = Config.objective
+            if objective == Objective.MINIMIZE:
                 if model.best_score < best:
                     best = model.best_score
                     self.hyper_params = hyper_params
-            elif self.objective == Objective.MAXIMIZE:
+            elif objective == Objective.MAXIMIZE:
                 if model.best_score > best:
                     best = model.best_score
                     self.hyper_params = hyper_params

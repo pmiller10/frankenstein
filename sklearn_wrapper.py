@@ -6,8 +6,7 @@ import logging
 class SkLearnWrapper(AbstractModel):
 
 
-    def __init__(self, objective, klass, default_hyperparams={}, log_level=logging.DEBUG):
-        self.objective = objective
+    def __init__(self, klass, default_hyperparams={}, log_level=logging.DEBUG):
         self.klass = klass
         self.__class__.__name__ = self.klass.__name__  # for logging
         super(self.__class__, self).__init__(default_hyperparams, log_level)
