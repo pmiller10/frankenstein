@@ -6,19 +6,18 @@ import logging
 class SkLearnWrapper(AbstractModel):
 
 
-    def __init__(self, objective, klass, log_level=logging.DEBUG):
-        self.objective = objective
+    def __init__(self, klass, default_hyperparams={}, log_level=logging.DEBUG):
         self.klass = klass
-        self.__class__.__name__ = self.klass.__name__  # for logging
-        super(self.__class__, self).__init__(log_level)
+        self.name = self.__class__.__name__ + '.' + self.klass.__name__
+        super(self.__class__, self).__init__(default_hyperparams, log_level)
 
 
-    def fit(self, data, targets, hyper_params):
-        if hyper_params:
-            self.model.set_params(**hyper_params)
-        if not self.model:
+    def fit(self, data, targets, hyperparams):
+        if not len([self.model]):
             self.logger.error('No model assigned')
             raise Exception('No model')
+        if hyperparams:
+            self.model.set_params(**hyperparams)
         self.model.fit(data, targets)
 
 
@@ -37,5 +36,5 @@ class SkLearnWrapper(AbstractModel):
         return train_data, cv_data, train_targets, cv_targets
 
 
-    def _initialize_model(self, hyper_params):
-        self.model = self.klass(**hyper_params)
+    def _initialize_model(self, hyperparams):
+        self.model = self.klass(**hyperparams)

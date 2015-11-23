@@ -26,7 +26,6 @@ When using the Ensemble, you are not limited to models provided by the FML frame
 ## Example
 
 ```
-from FML.constants import Objective
 from FML.pipeline import Pipeline
 from FML.preprocess import Polynomial
 from FML.abstract_model import ClassifierEnsemble, RegressionEnsemble
@@ -37,8 +36,6 @@ from sklearn.svm import SVC
 from sklearn import datasets
 
 
-objective = Objective.MAXIMIZE  # minimize/maximize the error/scoring function
-
 # Use scikit-learn dataset
 iris = datasets.load_iris()
 data = list(iris.data)
@@ -48,21 +45,21 @@ train_targets, holdout_targets = targets[::2], targets[1::2]
 
 # Feature engineering: Raise the training data to a
 # higher-order polynomial to see which polynomial does best
-model_params = {'klass': LogisticRegression}
-pipe = Pipeline(Polynomial, SkLearnWrapper, model_params, objective)
+model = SkLearnWrapper(LogisticRegression)
+pipe = Pipeline(Polynomial, model)
 pipe.fit(train_data, train_targets)
 train_data = pipe.transform(train_data)
 
 # Use scikit-learn models with wrapper class
 models = [LogisticRegression, RandomForestClassifier, SVC]
-models = [SkLearnWrapper(objective, m) for m in models]
-voter = SkLearnWrapper(objective, LogisticRegression)
-ensemble = RegressionEnsemble(models, voter, objective)
+models = [SkLearnWrapper(m) for m in models]
+voter = SkLearnWrapper(LogisticRegression)
+ensemble = RegressionEnsemble(models, voter)
 
 # Cross validate each model in the ensemble
 ensemble.optimize(train_data, train_targets)
 # Fit each model with hyperparams from the cross validation
-ensemble.fit(train_data, train_targets, ensemble.hyper_params)
+ensemble.fit(train_data, train_targets)
 
 # Predict on unseen data
 holdout_data = pipe.transform(holdout_data)

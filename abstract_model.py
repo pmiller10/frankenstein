@@ -2,40 +2,54 @@ import logging
 from collections import defaultdict
 import numpy
 from constants import Objective
-from config import Config
-import hyper_params_generator
+from _globals import Config
+import hyperparams_generator
 
 
 
 class AbstractModel(object):
 
-    def __init__(self, log_level=logging.DEBUG):
+    def __init__(self, default_hyperparams={}, log_level=logging.DEBUG):
         self.model = None
-        self.hyper_params = None
-        self.hyper_params_scores = list()
+        self.hyperparams = None
+        self.default_hyperparams = default_hyperparams
+        self.hyperparams_scores = list()
 
-        name = self.__class__.__name__ + ":" + str(id(self))
+        name = self._model_name()
         logger = logging.getLogger(name)
         logger.setLevel(log_level)
-        msg = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        extra = {'model_name': self._model_name()}
+
+        msg = '[%(asctime)s] %(levelname)s [%(model_name)s.%(funcName)s:%(lineno)d] %(message)s'
         formatter = logging.Formatter(msg)
 
         fh = logging.FileHandler('log.txt')
-        fh.set_name(self.__class__.__name__)
+        fh.set_name(name)
         fh.setLevel(log_level)
         fh.setFormatter(formatter)
 
         ch = logging.StreamHandler()
-        ch.set_name(self.__class__.__name__)
+        ch.set_name(name)
         ch.setLevel(log_level)
         ch.setFormatter(formatter)
 
         logger.addHandler(fh)
         logger.addHandler(ch)
+
+        logger = logging.LoggerAdapter(logger, extra)
         self.logger = logger
 
 
-    def fit(self, data, targets, hyper_params):
+    def _model_name(self):
+        # For logging: allows the model name to be safely overridden.
+        if hasattr(self, 'name'):
+            if self.name:
+                return self.name + '(' + str(id(self)) + ')'
+        else:
+            return self.__class__.__name__ + '(' + str(id(self)) + ')'
+
+
+    def fit(self, data, targets, hyperparams):
         raise NotImplementedError
 
 
@@ -60,31 +74,41 @@ class AbstractModel(object):
 
     def optimize(self, data, targets):
         train_data, cv_data, train_targets, cv_targets = self.create_datasets(data, targets)
-        for i in range(Config.epochs):
-            params = hyper_params_generator.generate(self.klass)
-            score = self.cross_validate(train_data, cv_data, train_targets, cv_targets, params)
-            self.logger.debug("Epoch {0} score = {1}. Hyperparams: {2}".format(i, score, params))
-            self.hyper_params_scores.append((params, score))
-        self.hyper_params, self.best_score = self._best_hyper_params()
-        self.logger.info("Best score = {0}. Hyperparams: {1}\n".format(self.best_score, self.hyper_params))
+        # the model was created with defined hyperparams so don't
+        # cross validate to optimize them
+        if self.default_hyperparams:
+            # TODO since you're going to run .fit() later,
+            # then should you just not train at all and just return here?
+            self.logger.info('Using default hyperparams. Skipping training.')
+            score = self.cross_validate(train_data, cv_data, train_targets, cv_targets, self.default_hyperparams)
+            self.hyperparams_scores.append((self.default_hyperparams, score))
+        # optimize hyperparams
+        else:
+            for i in range(Config.epochs):
+                params = hyperparams_generator.generate(self.klass)
+                score = self.cross_validate(train_data, cv_data, train_targets, cv_targets, params)
+                self.logger.debug("Epoch {0} score = {1}. Hyperparams: {2}".format(i, score, params))
+                self.hyperparams_scores.append((params, score))
+        self.hyperparams, self.best_score = self._best_hyperparams()
+        self.logger.info("Best score = {0}. Hyperparams: {1}\n".format(self.best_score, self.hyperparams))
 
 
     def create_datasets(self, data, targets):
         raise NotImplementedError
 
 
-    def cross_validate(self, train_data, cv_data, train_targets, cv_targets, hyper_params):
-        self._initialize_model(hyper_params)
-        self.fit(train_data, train_targets, hyper_params)
+    def cross_validate(self, train_data, cv_data, train_targets, cv_targets, hyperparams):
+        self._initialize_model(hyperparams)
+        self.fit(train_data, train_targets, hyperparams)
         preds = self.predict(cv_data)
         return self._score(preds, cv_targets)
 
 
-    def _initialize_model(self, hyper_params):
+    def _initialize_model(self, hyperparams):
         """
         This should initialize the weights of the model in place.
         For example,
-        self.model = sklearn.linear_model.LogisticRegression(**hyper_params)
+        self.model = sklearn.linear_model.LogisticRegression(**hyperparams)
         """
         raise NotImplementedError
 
@@ -93,15 +117,16 @@ class AbstractModel(object):
         return Config.loss(preds, targets)
 
 
-    def _best_hyper_params(self):
-        scores = [score for params,score in self.hyper_params_scores]
-        if self.objective == Objective.MINIMIZE:
+    def _best_hyperparams(self):
+        scores = [score for params,score in self.hyperparams_scores]
+        objective = Config.objective
+        if objective == Objective.MINIMIZE:
             best = min(scores)
-        elif self.objective == Objective.MAXIMIZE:
+        elif objective == Objective.MAXIMIZE:
             best = max(scores)
         else:
             raise Exception('{0}.objective not defined'.format(self.__class__.__name__))
-        for params,score in self.hyper_params_scores:
+        for params,score in self.hyperparams_scores:
             if score == best:
                 return params, score
         raise Exception('best score not found')
@@ -121,13 +146,12 @@ class AbstractEnsemble(AbstractModel):
             model.optimize(data, targets)
 
 
-    # TODO remove the _ param
-    def fit(self, data, targets, _):
+    def fit(self, data, targets):
         """
         param :data should be a list of lists
         """
         for model in self.models:
-            model.fit(data, targets, model.hyper_params)  # TODO split into CV set?
+            model.fit(data, targets, model.hyperparams)  # TODO split into CV set?
 
         if self.__class__.__name__ == 'RegressionEnsemble':
             preds = [m.predict(data) for m in self.models]
@@ -145,17 +169,15 @@ class AbstractEnsemble(AbstractModel):
 
 class RegressionEnsemble(AbstractEnsemble):
 
-    def __init__(self, models, voter, objective, log_level=logging.DEBUG):
+    def __init__(self, models, voter, log_level=logging.DEBUG):
         """
         param :models is a list of FML models.
-        param :objective is a constants.Objective constant
         param :voter is a instance of a model to vote for the output
         """
-        self.objective = objective
         self.models = []
         self.voter = voter
         self.models = models
-        super(self.__class__, self).__init__(log_level)
+        super(self.__class__, self).__init__({}, log_level)
 
 
     def _meta_features(self, data):
@@ -181,17 +203,15 @@ class RegressionEnsemble(AbstractEnsemble):
 class ClassifierEnsemble(AbstractEnsemble):
 
 
-    def __init__(self, models, voter, objective, log_level=logging.DEBUG):
+    def __init__(self, models, voter, log_level=logging.DEBUG):
         """
         param :models is a list of FML models.
-        param :objective is a constants.Objective constant
         param :voter is a instance of a model to vote for the output
         """
-        self.objective = objective
         self.models = []
         self.voter = voter
         self.models = models
-        super(self.__class__, self).__init__(log_level)
+        super(self.__class__, self).__init__({}, log_level)
 
 
     def predict_proba(self, data):

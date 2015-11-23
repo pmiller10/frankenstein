@@ -1,7 +1,13 @@
+from constants import Objective
+
 class DefaultConfig():
 
 
-    epochs = 10  # number of variations to cross validate per model
+    # number of variations to cross validate per model
+    epochs = 10
+
+    # models should minimize or maximize the loss function
+    objective = Objective.MINIMIZE
 
 
     class Polynomial():

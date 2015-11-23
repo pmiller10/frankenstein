@@ -1,35 +1,27 @@
 import logging
 from constants import Objective
+from _globals import Config
 
 
 
 class Pipeline(object):
 
 
-    def __init__(self, transformer, model_klass, model_params, objective, log_level=logging.DEBUG):
+    def __init__(self, transformer, model, log_level=logging.DEBUG):
         """
         The transformer should be a Preprocess class.
-        The model_klass should be the class of the model.
-        The model_params are a dict of the params to initialize the model.
+        The model should be a FML compliant model.
         """
-        # populate the model params with the Pipeline params
-        # unless they're otherwise defined
-        if 'objective' not in model_params:
-            model_params['objective'] = objective
-        if 'log_level' not in model_params:
-            model_params['log_level'] = log_level
 
         self.transformer = transformer
-        self.model_klass = model_klass
-        self.model_params = model_params
-        self.objective = objective
+        self.model = model
         self.log_level = log_level
 
         # set up logger
-        name = self.__class__.__name__ + ":" + str(id(self))
+        name = self.__class__.__name__ + '(' + str(id(self)) + ')'
         logger = logging.getLogger(name)
         logger.setLevel(log_level)
-        msg = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        msg = '[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s'
         formatter = logging.Formatter(msg)
 
         fh = logging.FileHandler('log.txt')
@@ -48,41 +40,61 @@ class Pipeline(object):
 
 
 
-    def fit(self, data, targets, unsupervised_data=None):
+    def fit(self, data, targets):
         """
         Should accept a dataset and targets.
-        Should set self.hyper_params
+        Should set self.hyperparams
         """
 
         # test without transforming data to get a baseline score
-        model = self.model_klass(**self.model_params)
-        model.optimize(data, targets)
-        best = model.best_score
-        self.hyper_params = None
-        self.logger.info('Score without transformation = {0}'.format(model.best_score))
+        self.model.optimize(data, targets)
+        best = self.model.best_score
+        self.hyperparams = None
+        self.logger.info('Score without transformation = {0}'.format(self.model.best_score))
 
         # the transformer class should return a generator of modified datasets
-        # test each one with the model, and if the performance is better, then
+        # test each one with the self.model, and if the performance is better, then
         # set the new best score to that performance
-        for transformed, hyper_params in self.transformer().each_transformation(data, unsupervised_data):
-            model = self.model_klass(**self.model_params)
-            model.optimize(transformed, targets)
-            self.logger.info("Best score with {0} = {1}".format(hyper_params, model.best_score))
+        for transformed, hyperparams in self.transformer().each_transformation(data):
 
-            if self.objective == Objective.MINIMIZE:
-                if model.best_score < best:
-                    best = model.best_score
-                    self.hyper_params = hyper_params
-            elif self.objective == Objective.MAXIMIZE:
-                if model.best_score > best:
-                    best = model.best_score
-                    self.hyper_params = hyper_params
+            # Pass the params from the model to the class of the model.
+            # This creates a new model with fresh weights that haven't been
+            # fitted yet. Don't pop 'default_hyperparams' so that the model
+            # can be created with default params.
+            model_params = self.model.__dict__
+            blacklist = ['best_score', 'hyperparams', 'hyperparams_scores',
+                         'logger', 'model', 'name']
+            for param in blacklist:
+                model_params.pop(param)
+
+            try:
+                self.model = self.model.__class__(**model_params)
+            except TypeError as ee:
+                msg = """Tried to create model but there's probably a param
+                         that needs to be included in the blacklist above.
+                         Actual error: {0}""".format(ee)
+                raise Exception(msg)
+
+
+            self.model.optimize(transformed, targets)
+            self.logger.info("Best score with {0} = {1}".format(hyperparams, self.model.best_score))
+
+            objective = Config.objective
+            if objective == Objective.MINIMIZE:
+                if self.model.best_score < best:
+                    best = self.model.best_score
+                    self.hyperparams = hyperparams
+            elif objective == Objective.MAXIMIZE:
+                if self.model.best_score > best:
+                    best = self.model.best_score
+                    self.hyperparams = hyperparams
+        self.logger.info("Best overall score {0}".format(self.hyperparams))
 
 
 
     def transform(self, data):
-        if self.hyper_params:
-            return self.transformer().transform(data, **self.hyper_params)
+        if self.hyperparams:
+            return self.transformer().transform(data, **self.hyperparams)
         else:
-            self.logger.warn('hyper_params set to None. Either you forgot to run .fit(), or .fit() found no improvement')
+            self.logger.warn('hyperparams set to None. Either you forgot to run .fit(), or .fit() found no improvement')
             return data
