@@ -22,7 +22,7 @@ test_data, test_targets = Data.test()
 extra_data = test_data
 pipe = Pipeline(Polynomial, LogisticRegressionModel, objective, logging.WARN)
 pipe.fit(train_data, train_targets, extra_data)
-print pipe.hyper_params
+print pipe.hyperparams
 
 # train model
 train_data = pipe.transform(train_data)
@@ -35,7 +35,7 @@ voter2 = LogisticRegressionModel(objective, logging.INFO)
 master = ClassifierEnsemble([ensemble], voter2, objective, logging.INFO)
 
 master.optimize(train_data, train_targets)
-master.fit(train_data, train_targets, master.hyper_params)
+master.fit(train_data, train_targets, master.hyperparams)
 
 # submission file
 test_data = pipe.transform(test_data)

@@ -62,7 +62,7 @@ ensemble = RegressionEnsemble(models, voter, objective)
 # Cross validate each model in the ensemble
 ensemble.optimize(train_data, train_targets)
 # Fit each model with hyperparams from the cross validation
-ensemble.fit(train_data, train_targets, ensemble.hyper_params)
+ensemble.fit(train_data, train_targets, ensemble.hyperparams)
 
 # Predict on unseen data
 holdout_data = pipe.transform(holdout_data)

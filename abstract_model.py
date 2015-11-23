@@ -3,7 +3,7 @@ from collections import defaultdict
 import numpy
 from constants import Objective
 from _globals import Config
-import hyper_params_generator
+import hyperparams_generator
 
 
 
@@ -11,9 +11,9 @@ class AbstractModel(object):
 
     def __init__(self, default_hyperparams={}, log_level=logging.DEBUG):
         self.model = None
-        self.hyper_params = None
+        self.hyperparams = None
         self.default_hyperparams = default_hyperparams
-        self.hyper_params_scores = list()
+        self.hyperparams_scores = list()
 
         name = self._model_name()  #self.__class__.__name__ + ":" + str(id(self))
         logger = logging.getLogger(name)
@@ -49,7 +49,7 @@ class AbstractModel(object):
             return self.__class__.__name__ + '(' + str(id(self)) + ')'
 
 
-    def fit(self, data, targets, hyper_params):
+    def fit(self, data, targets, hyperparams):
         raise NotImplementedError
 
 
@@ -81,34 +81,34 @@ class AbstractModel(object):
             # then should you just not train at all and just return here?
             self.logger.info('Using default hyperparams. Skipping training.')
             score = self.cross_validate(train_data, cv_data, train_targets, cv_targets, self.default_hyperparams)
-            self.hyper_params_scores.append((self.default_hyperparams, score))
+            self.hyperparams_scores.append((self.default_hyperparams, score))
         # optimize hyperparams
         else:
             for i in range(Config.epochs):
-                params = hyper_params_generator.generate(self.klass)
+                params = hyperparams_generator.generate(self.klass)
                 score = self.cross_validate(train_data, cv_data, train_targets, cv_targets, params)
                 self.logger.debug("Epoch {0} score = {1}. Hyperparams: {2}".format(i, score, params))
-                self.hyper_params_scores.append((params, score))
-        self.hyper_params, self.best_score = self._best_hyper_params()
-        self.logger.info("Best score = {0}. Hyperparams: {1}\n".format(self.best_score, self.hyper_params))
+                self.hyperparams_scores.append((params, score))
+        self.hyperparams, self.best_score = self._best_hyperparams()
+        self.logger.info("Best score = {0}. Hyperparams: {1}\n".format(self.best_score, self.hyperparams))
 
 
     def create_datasets(self, data, targets):
         raise NotImplementedError
 
 
-    def cross_validate(self, train_data, cv_data, train_targets, cv_targets, hyper_params):
-        self._initialize_model(hyper_params)
-        self.fit(train_data, train_targets, hyper_params)
+    def cross_validate(self, train_data, cv_data, train_targets, cv_targets, hyperparams):
+        self._initialize_model(hyperparams)
+        self.fit(train_data, train_targets, hyperparams)
         preds = self.predict(cv_data)
         return self._score(preds, cv_targets)
 
 
-    def _initialize_model(self, hyper_params):
+    def _initialize_model(self, hyperparams):
         """
         This should initialize the weights of the model in place.
         For example,
-        self.model = sklearn.linear_model.LogisticRegression(**hyper_params)
+        self.model = sklearn.linear_model.LogisticRegression(**hyperparams)
         """
         raise NotImplementedError
 
@@ -117,8 +117,8 @@ class AbstractModel(object):
         return Config.loss(preds, targets)
 
 
-    def _best_hyper_params(self):
-        scores = [score for params,score in self.hyper_params_scores]
+    def _best_hyperparams(self):
+        scores = [score for params,score in self.hyperparams_scores]
         objective = Config.objective
         if objective == Objective.MINIMIZE:
             best = min(scores)
@@ -126,7 +126,7 @@ class AbstractModel(object):
             best = max(scores)
         else:
             raise Exception('{0}.objective not defined'.format(self.__class__.__name__))
-        for params,score in self.hyper_params_scores:
+        for params,score in self.hyperparams_scores:
             if score == best:
                 return params, score
         raise Exception('best score not found')
@@ -152,7 +152,7 @@ class AbstractEnsemble(AbstractModel):
         param :data should be a list of lists
         """
         for model in self.models:
-            model.fit(data, targets, model.hyper_params)  # TODO split into CV set?
+            model.fit(data, targets, model.hyperparams)  # TODO split into CV set?
 
         if self.__class__.__name__ == 'RegressionEnsemble':
             preds = [m.predict(data) for m in self.models]

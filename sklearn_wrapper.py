@@ -12,9 +12,9 @@ class SkLearnWrapper(AbstractModel):
         super(self.__class__, self).__init__(default_hyperparams, log_level)
 
 
-    def fit(self, data, targets, hyper_params):
-        if hyper_params:
-            self.model.set_params(**hyper_params)
+    def fit(self, data, targets, hyperparams):
+        if hyperparams:
+            self.model.set_params(**hyperparams)
         if not self.model:
             self.logger.error('No model assigned')
             raise Exception('No model')
@@ -36,5 +36,5 @@ class SkLearnWrapper(AbstractModel):
         return train_data, cv_data, train_targets, cv_targets
 
 
-    def _initialize_model(self, hyper_params):
-        self.model = self.klass(**hyper_params)
+    def _initialize_model(self, hyperparams):
+        self.model = self.klass(**hyperparams)
