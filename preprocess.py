@@ -22,6 +22,6 @@ class Polynomial(Preprocess):
         return lib.polynomial(dataset, exponent)
 
 
-    def each_transformation(self, dataset, _):
+    def each_transformation(self, dataset):
         for exponent in range(Config.Polynomial.START, Config.Polynomial.STOP):
             yield self.transform(dataset, exponent), {'exponent': exponent}
