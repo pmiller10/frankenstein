@@ -88,6 +88,7 @@ class Pipeline(object):
                 if self.model.best_score > best:
                     best = self.model.best_score
                     self.hyperparams = hyperparams
+        self.logger.info("Best overall score {0}".format(self.hyperparams))
 
 
 

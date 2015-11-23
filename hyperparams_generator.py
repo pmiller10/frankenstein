@@ -45,7 +45,10 @@ param_limits = {
                 'penalty': StrGen(['l1', 'l2']),
                 'degree': IntGen(1, 5),
                 'alpha': FloatGen(0.1, 10.),
-                'kernel': StrGen(['linear', 'rbf', 'sigmoid'])  # TODO why does 'polynomial' generate error?
+                'kernel': StrGen(['linear', 'rbf', 'sigmoid']),  # TODO why does 'polynomial' generate error?
+                'loss': StrGen(['log', 'modified_huber']),
+                'n_neighbors': IntGen(5,30),
+                'weights': StrGen(['uniform', 'distance'])
                }
 
 def generate(klass):
