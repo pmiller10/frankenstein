@@ -25,3 +25,16 @@ class Polynomial(Preprocess):
     def each_transformation(self, dataset):
         for exponent in range(Config.Polynomial.START, Config.Polynomial.STOP):
             yield self.transform(dataset, exponent), {'exponent': exponent}
+
+
+
+class Scale(Preprocess):
+
+
+    def transform(self, dataset):
+        return lib.scale(dataset)
+
+
+    def each_transformation(self, dataset):
+        for i in range(1):
+            yield self.transform(dataset), {'scale': True}
