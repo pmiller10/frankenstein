@@ -18,10 +18,10 @@ class Pipeline(object):
         self.log_level = log_level
 
         # set up logger
-        name = self.__class__.__name__ + ":" + str(id(self))
+        name = self.__class__.__name__ + '(' + str(id(self)) + ')'
         logger = logging.getLogger(name)
         logger.setLevel(log_level)
-        msg = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        msg = '[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s'
         formatter = logging.Formatter(msg)
 
         fh = logging.FileHandler('log.txt')

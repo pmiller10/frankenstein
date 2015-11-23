@@ -8,7 +8,7 @@ class SkLearnWrapper(AbstractModel):
 
     def __init__(self, klass, default_hyperparams={}, log_level=logging.DEBUG):
         self.klass = klass
-        self.name = self.klass.__name__
+        self.name = self.__class__.__name__ + '.' + self.klass.__name__
         super(self.__class__, self).__init__(default_hyperparams, log_level)
 
 

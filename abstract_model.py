@@ -15,12 +15,12 @@ class AbstractModel(object):
         self.default_hyperparams = default_hyperparams
         self.hyperparams_scores = list()
 
-        name = self._model_name()  #self.__class__.__name__ + ":" + str(id(self))
+        name = self._model_name()
         logger = logging.getLogger(name)
         logger.setLevel(log_level)
         extra = {'model_name': self._model_name()}
 
-        msg = '%(asctime)s - %(model_name)s - %(levelname)s - %(message)s'
+        msg = '[%(asctime)s] %(levelname)s [%(model_name)s.%(funcName)s:%(lineno)d] %(message)s'
         formatter = logging.Formatter(msg)
 
         fh = logging.FileHandler('log.txt')
