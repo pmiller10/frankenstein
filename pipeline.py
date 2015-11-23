@@ -62,11 +62,13 @@ class Pipeline(object):
             # fitted yet. Don't pop 'default_hyperparams' so that the model
             # can be created with default params.
             model_params = self.model.__dict__
+            # TODO refactor into list
             model_params.pop('best_score')
             model_params.pop('hyper_params')
             model_params.pop('hyper_params_scores')
             model_params.pop('logger')
             model_params.pop('model')
+            model_params.pop('name')
             self.model = self.model.__class__(**model_params)
             self.model.optimize(transformed, targets)
             self.logger.info("Best score with {0} = {1}".format(hyper_params, self.model.best_score))

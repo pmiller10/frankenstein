@@ -15,25 +15,38 @@ class AbstractModel(object):
         self.default_hyperparams = default_hyperparams
         self.hyper_params_scores = list()
 
-        name = self.__class__.__name__ + ":" + str(id(self))
+        name = self._model_name()  #self.__class__.__name__ + ":" + str(id(self))
         logger = logging.getLogger(name)
         logger.setLevel(log_level)
-        msg = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        extra = {'model_name': self._model_name()}
+
+        msg = '%(asctime)s - %(model_name)s - %(levelname)s - %(message)s'
         formatter = logging.Formatter(msg)
 
         fh = logging.FileHandler('log.txt')
-        fh.set_name(self.__class__.__name__)
+        fh.set_name(name)
         fh.setLevel(log_level)
         fh.setFormatter(formatter)
 
         ch = logging.StreamHandler()
-        ch.set_name(self.__class__.__name__)
+        ch.set_name(name)
         ch.setLevel(log_level)
         ch.setFormatter(formatter)
 
         logger.addHandler(fh)
         logger.addHandler(ch)
+
+        logger = logging.LoggerAdapter(logger, extra)
         self.logger = logger
+
+
+    def _model_name(self):
+        # For logging: allows the model name to be safely overridden.
+        if hasattr(self, 'name'):
+            if self.name:
+                return self.name + '(' + str(id(self)) + ')'
+        else:
+            return self.__class__.__name__ + '(' + str(id(self)) + ')'
 
 
     def fit(self, data, targets, hyper_params):
