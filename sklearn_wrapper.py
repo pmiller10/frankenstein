@@ -13,11 +13,11 @@ class SkLearnWrapper(AbstractModel):
 
 
     def fit(self, data, targets, hyperparams):
-        if hyperparams:
-            self.model.set_params(**hyperparams)
-        if not self.model:
+        if not len([self.model]):
             self.logger.error('No model assigned')
             raise Exception('No model')
+        if hyperparams:
+            self.model.set_params(**hyperparams)
         self.model.fit(data, targets)
 
 
