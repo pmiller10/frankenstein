@@ -62,14 +62,20 @@ class Pipeline(object):
             # fitted yet. Don't pop 'default_hyperparams' so that the model
             # can be created with default params.
             model_params = self.model.__dict__
-            # TODO refactor into list
-            model_params.pop('best_score')
-            model_params.pop('hyper_params')
-            model_params.pop('hyper_params_scores')
-            model_params.pop('logger')
-            model_params.pop('model')
-            model_params.pop('name')
-            self.model = self.model.__class__(**model_params)
+            blacklist = ['best_score', 'hyper_params', 'hyper_params_scores',
+                         'logger', 'model', 'name']
+            for param in blacklist:
+                model_params.pop(param)
+
+            try:
+                self.model = self.model.__class__(**model_params)
+            except TypeError as ee:
+                msg = """Tried to create model but there's probably a param
+                         that needs to be included in the blacklist above.
+                         Actual error: {0}""".format(ee)
+                raise Exception(msg)
+
+
             self.model.optimize(transformed, targets)
             self.logger.info("Best score with {0} = {1}".format(hyper_params, self.model.best_score))
 
