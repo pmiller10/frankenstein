@@ -9,10 +9,10 @@ import hyper_params_generator
 
 class AbstractModel(object):
 
-    def __init__(self, default_hyper_params={}, log_level=logging.DEBUG):
+    def __init__(self, default_hyperparams={}, log_level=logging.DEBUG):
         self.model = None
         self.hyper_params = None
-        self.default_hyper_params = default_hyper_params
+        self.default_hyperparams = default_hyperparams
         self.hyper_params_scores = list()
 
         name = self.__class__.__name__ + ":" + str(id(self))
@@ -63,12 +63,12 @@ class AbstractModel(object):
         train_data, cv_data, train_targets, cv_targets = self.create_datasets(data, targets)
         # the model was created with defined hyperparams so don't
         # cross validate to optimize them
-        if self.default_hyper_params:
+        if self.default_hyperparams:
             # TODO since you're going to run .fit() later,
             # then should you just not train at all and just return here?
             self.logger.info('Using default hyperparams. Skipping training.')
-            score = self.cross_validate(train_data, cv_data, train_targets, cv_targets, self.default_hyper_params)
-            self.hyper_params_scores.append((self.default_hyper_params, score))
+            score = self.cross_validate(train_data, cv_data, train_targets, cv_targets, self.default_hyperparams)
+            self.hyper_params_scores.append((self.default_hyperparams, score))
         # optimize hyperparams
         else:
             for i in range(Config.epochs):

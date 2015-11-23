@@ -7,20 +7,14 @@ from _globals import Config
 class Pipeline(object):
 
 
-    def __init__(self, transformer, model_klass, model_params, log_level=logging.DEBUG):
+    def __init__(self, transformer, model, log_level=logging.DEBUG):
         """
         The transformer should be a Preprocess class.
-        The model_klass should be the class of the model.
-        The model_params are a dict of the params to initialize the model.
+        The model should be a FML compliant model.
         """
-        # populate the model params with the Pipeline params
-        # unless they're otherwise defined
-        if 'log_level' not in model_params:
-            model_params['log_level'] = log_level
 
         self.transformer = transformer
-        self.model_klass = model_klass
-        self.model_params = model_params
+        self.model = model
         self.log_level = log_level
 
         # set up logger
@@ -53,28 +47,38 @@ class Pipeline(object):
         """
 
         # test without transforming data to get a baseline score
-        model = self.model_klass(**self.model_params)
-        model.optimize(data, targets)
-        best = model.best_score
+        self.model.optimize(data, targets)
+        best = self.model.best_score
         self.hyper_params = None
-        self.logger.info('Score without transformation = {0}'.format(model.best_score))
+        self.logger.info('Score without transformation = {0}'.format(self.model.best_score))
 
         # the transformer class should return a generator of modified datasets
-        # test each one with the model, and if the performance is better, then
+        # test each one with the self.model, and if the performance is better, then
         # set the new best score to that performance
         for transformed, hyper_params in self.transformer().each_transformation(data, unsupervised_data):
-            model = self.model_klass(**self.model_params)
-            model.optimize(transformed, targets)
-            self.logger.info("Best score with {0} = {1}".format(hyper_params, model.best_score))
+
+            # Pass the params from the model to the class of the model.
+            # This creates a new model with fresh weights that haven't been
+            # fitted yet. Don't pop 'default_hyperparams' so that the model
+            # can be created with default params.
+            model_params = self.model.__dict__
+            model_params.pop('best_score')
+            model_params.pop('hyper_params')
+            model_params.pop('hyper_params_scores')
+            model_params.pop('logger')
+            model_params.pop('model')
+            self.model = self.model.__class__(**model_params)
+            self.model.optimize(transformed, targets)
+            self.logger.info("Best score with {0} = {1}".format(hyper_params, self.model.best_score))
 
             objective = Config.objective
             if objective == Objective.MINIMIZE:
-                if model.best_score < best:
-                    best = model.best_score
+                if self.model.best_score < best:
+                    best = self.model.best_score
                     self.hyper_params = hyper_params
             elif objective == Objective.MAXIMIZE:
-                if model.best_score > best:
-                    best = model.best_score
+                if self.model.best_score > best:
+                    best = self.model.best_score
                     self.hyper_params = hyper_params
 
 
