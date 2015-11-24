@@ -92,8 +92,16 @@ class Pipeline(object):
 
 
 
-    def transform(self, data):
+    def transform(self, data, force_hyperparams={}):
+        # If user explicity defines defines the params, then use them.
+        if force_hyperparams:
+            msg = 'Using forced params: {0}'.format(force_hyperparams)
+            self.logger.info(msg)
+            return self.transformer().transform(data, **force_hyperparams)
+
+        # Otherwise, use the trained params.
         if self.hyperparams:
+            msg = 'Using trained params: {0}'.format(self.hyperparams)
             return self.transformer().transform(data, **self.hyperparams)
         else:
             self.logger.warn('hyperparams set to None. Either you forgot to run .fit(), or .fit() found no improvement')

@@ -31,7 +31,9 @@ class Polynomial(Preprocess):
 class Scale(Preprocess):
 
 
-    def transform(self, dataset):
+    def transform(self, dataset, scale=True):
+        # Define the scale param even though it's not used.
+        # That way it's consistent with other Preprocess subclasses.
         return lib.scale(dataset)
 
 
