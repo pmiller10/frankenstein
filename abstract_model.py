@@ -72,7 +72,7 @@ class AbstractModel(object):
         raise NotImplementedError
 
 
-    def optimize(self, data, targets):
+    def tune(self, data, targets):
         train_data, cv_data, train_targets, cv_targets = self.create_datasets(data, targets)
         # the model was created with defined hyperparams so don't
         # cross validate to optimize them
@@ -141,9 +141,9 @@ class AbstractEnsemble(AbstractModel):
         return self.voter.predict(meta_features)
 
 
-    def optimize(self, data, targets):
+    def tune(self, data, targets):
         for model in self.models:
-            model.optimize(data, targets)
+            model.tune(data, targets)
 
 
     def fit(self, data, targets):
@@ -163,7 +163,7 @@ class AbstractEnsemble(AbstractModel):
 
         meta_features = self._meta_features(data)
         self.logger.info('Optimizing voter')
-        self.voter.optimize(meta_features, targets)
+        self.voter.tune(meta_features, targets)
         self.voter.fit(meta_features, targets, {})
 
 

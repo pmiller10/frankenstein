@@ -34,7 +34,7 @@ ensemble = ClassifierEnsemble(models, voter1, objective, logging.INFO)
 voter2 = LogisticRegressionModel(objective, logging.INFO)
 master = ClassifierEnsemble([ensemble], voter2, objective, logging.INFO)
 
-master.optimize(train_data, train_targets)
+master.tune(train_data, train_targets)
 master.fit(train_data, train_targets, master.hyperparams)
 
 # submission file

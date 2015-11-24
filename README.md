@@ -57,7 +57,7 @@ voter = SkLearnWrapper(LogisticRegression)
 ensemble = RegressionEnsemble(models, voter)
 
 # Cross validate each model in the ensemble
-ensemble.optimize(train_data, train_targets)
+ensemble.tune(train_data, train_targets)
 # Fit each model with hyperparams from the cross validation
 ensemble.fit(train_data, train_targets)
 

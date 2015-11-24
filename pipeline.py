@@ -47,7 +47,7 @@ class Pipeline(object):
         """
 
         # test without transforming data to get a baseline score
-        self.model.optimize(data, targets)
+        self.model.tune(data, targets)
         best = self.model.best_score
         self.hyperparams = None
         self.logger.info('Score without transformation = {0}'.format(self.model.best_score))
@@ -76,7 +76,7 @@ class Pipeline(object):
                 raise Exception(msg)
 
 
-            self.model.optimize(transformed, targets)
+            self.model.tune(transformed, targets)
             self.logger.info("Best score with {0} = {1}".format(hyperparams, self.model.best_score))
 
             objective = Config.objective

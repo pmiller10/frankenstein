@@ -45,7 +45,7 @@ class TestModel():
         assert(targets == expected_targets) 
 
 
-    def test_optimize(self):
+    def test_tune(self):
         model = LogisticRegressionModel(Objective.MINIMIZE, log_level=logging.WARN)
         assert(model.hyper_params == None)
         assert(model.hyper_params_scores == [])
@@ -53,7 +53,7 @@ class TestModel():
         iris = datasets.load_iris()
         data = list(iris.data)
         targets = list(iris.target)
-        model.optimize(data, targets)
+        model.tune(data, targets)
 
         assert(len(model.hyper_params_scores) == 70)
 
@@ -68,11 +68,11 @@ class TestFeature():
         data = [[d] for d in data]
 
         feature = Feature(Objective.MINIMIZE, log_level=logging.WARN)
-        feature.optimize(data, targets)
+        feature.tune(data, targets)
 
         assert feature.polynomial == polynomial, "{0} != {1}".format(feature.polynomial, polynomial)
 
-    def test_optimize_higher_order_polynomial(self):
+    def test_tune_higher_order_polynomial(self):
         self._test_polynomial(2)
         self._test_polynomial(3)
         self._test_polynomial(4)
@@ -129,11 +129,11 @@ class TestLib():
 if __name__ == "__main__":
     TestModel().test_score()
     TestModel().test_datasets()
-    TestModel().test_optimize()
+    TestModel().test_tune()
     TestLib().test_polynomial()
     TestLib().test_norm_positives()
     TestLib().test_norm_negatives()
     TestLib().test_scaler_vector()
     TestLib().test_scaler_matrix()
-    TestFeature().test_optimize_higher_order_polynomial()
+    TestFeature().test_tune_higher_order_polynomial()
     print 'success'
