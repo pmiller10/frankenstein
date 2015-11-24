@@ -40,3 +40,16 @@ class Scale(Preprocess):
     def each_transformation(self, dataset):
         for i in range(1):
             yield self.transform(dataset), {'scale': True}
+
+
+
+class Norm(Preprocess):
+
+
+    def transform(self, dataset, normalize=True):
+        return lib.norm(dataset)
+
+
+    def each_transformation(self, dataset):
+        for i in range(1):
+            yield self.transform(dataset), {'normalize': True}
