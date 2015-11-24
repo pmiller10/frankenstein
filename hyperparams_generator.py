@@ -48,7 +48,8 @@ param_limits = {
                 'kernel': StrGen(['linear', 'rbf', 'sigmoid']),  # TODO why does 'polynomial' generate error?
                 'loss': StrGen(['log', 'modified_huber']),
                 'n_neighbors': IntGen(5,30),
-                'weights': StrGen(['uniform', 'distance'])
+                'weights': StrGen(['uniform', 'distance']),
+                'probability': StrGen([True])  # Must be True for_predict_proba
                }
 
 def generate(klass):
