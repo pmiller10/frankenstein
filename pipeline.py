@@ -16,12 +16,15 @@ class Pipeline(object):
         self.transformer = transformer
         self.model = model
         self.log_level = log_level
+        self.name = self.__class__.__name__ + '.' + self.transformer.__name__
 
         # set up logger
-        name = self.__class__.__name__ + '(' + str(id(self)) + ')'
+        name = self._model_name()
         logger = logging.getLogger(name)
         logger.setLevel(log_level)
-        msg = '[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s'
+        extra = {'model_name': self._model_name()}
+
+        msg = '[%(asctime)s] %(levelname)s [%(model_name)s.%(funcName)s:%(lineno)d] %(message)s'
         formatter = logging.Formatter(msg)
 
         fh = logging.FileHandler('log.txt')
@@ -36,8 +39,18 @@ class Pipeline(object):
 
         logger.addHandler(fh)
         logger.addHandler(ch)
+
+        logger = logging.LoggerAdapter(logger, extra)
         self.logger = logger
 
+
+    def _model_name(self):
+        # For logging: allows the model name to be safely overridden.
+        if hasattr(self, 'name'):
+            if self.name:
+                return self.name + '(' + str(id(self)) + ')'
+        else:
+            return self.__class__.__name__ + '(' + str(id(self)) + ')'
 
 
     def fit(self, data, targets):
@@ -104,5 +117,5 @@ class Pipeline(object):
             msg = 'Using trained params: {0}'.format(self.hyperparams)
             return self.transformer().transform(data, **self.hyperparams)
         else:
-            self.logger.warn('hyperparams set to None. Either you forgot to run .fit(), or .fit() found no improvement')
+            self.logger.warning('hyperparams set to None. Either you forgot to run .fit(), or .fit() found no improvement')
             return data
