@@ -1,2 +1,0 @@
-def submission(preds):
-    pass
