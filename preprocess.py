@@ -1,5 +1,6 @@
 import lib
 from _globals import Config
+from sklearn import preprocessing
 
 
 
@@ -34,7 +35,7 @@ class Scale(Preprocess):
     def transform(self, dataset, scale=True):
         # Define the scale param even though it's not used.
         # That way it's consistent with other Preprocess subclasses.
-        return lib.scale(dataset)
+        return preprocessing.scale(dataset)
 
 
     def each_transformation(self, dataset):
@@ -46,10 +47,11 @@ class Scale(Preprocess):
 class Norm(Preprocess):
 
 
-    def transform(self, dataset, normalize=True):
-        return lib.norm(dataset)
+    def transform(self, dataset, norm):
+        return preprocessing.normalize(dataset, norm=norm)
 
 
     def each_transformation(self, dataset):
-        for i in range(1):
-            yield self.transform(dataset), {'normalize': True}
+        norms = ['l1', 'l2']
+        for n in norms:
+            yield self.transform(dataset, norm=n), {'norm': n}
