@@ -1,6 +1,4 @@
 from abstract_model import AbstractModel
-from sklearn.linear_model import LinearRegression, LogisticRegression
-from sklearn.svm import SVC
 import logging
 
 class SkLearnWrapper(AbstractModel):

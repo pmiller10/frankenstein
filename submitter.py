@@ -1,3 +1,5 @@
+import os
+
 def submit(text):
     """Pass in the text for the submission.
     This will save it in a file in /submissions directory.
