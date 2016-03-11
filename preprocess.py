@@ -2,6 +2,7 @@ import lib
 from _globals import Config
 from sklearn import preprocessing
 from sklearn.preprocessing import PolynomialFeatures
+import numpy
 
 
 
@@ -14,6 +15,36 @@ class Preprocess(object):
         Should return the modified dataset.
         """
         return NotImplementedError
+
+
+class ScalableInteraction(Preprocess):
+
+    def transform(self, dataset, size=2, interaction_only=True):
+        degree = 2  # keep this at 2, so it doesn't get too large.
+        dims = len(dataset[0])
+        poly = PolynomialFeatures(degree=degree, interaction_only=interaction_only)
+        output = []
+        for i,row in enumerate(dataset):
+            if i % 100 == 0:
+                print 'in row', i
+            start, stop = 0, size
+            #new_row = numpy.array([])
+            new_row = []
+            while stop <= dims:
+                subsection = row[start:stop]
+                sub = poly.fit_transform(subsection)
+                start += size
+                stop += size
+                sub = list(sub)
+                sub = list(sub[0])
+                new_row = new_row + sub
+            output.append(new_row)
+        return output
+
+    def each_transformation(self, dataset, slice_size=10):
+        for size in range(2, 10):  # TODO move this to config file
+            print 'in each_transformation. size={}'.format(size)
+            yield self.transform(dataset), {'size': size, 'interaction_only': True}
 
 
 class Interaction(Preprocess):
