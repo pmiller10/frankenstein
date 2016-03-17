@@ -50,13 +50,14 @@ class ScalableInteraction(Preprocess):
 class Interaction(Preprocess):
 
 
-    def transform(self, dataset, interaction_only=True):
-        degree = 2  # keep this at 2, so it doesn't get too large.
-        poly = PolynomialFeatures(degree=degree, interaction_only=interaction_only)
+    def transform(self, dataset, degree=2, interaction_only=True):
+        # keep degree at 2, so it doesn't get too large.
+        poly = PolynomialFeatures(degree=degree,
+                                  interaction_only=interaction_only)
         return poly.fit_transform(dataset)
 
     def each_transformation(self, dataset):
-        yield self.transform(dataset), {'interaction_only': True}
+        yield self.transform(dataset), {'degree': 2, 'interaction_only': True}
 
 
 class Polynomial(Preprocess):
