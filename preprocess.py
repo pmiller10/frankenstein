@@ -2,6 +2,7 @@ import lib
 from _globals import Config
 from sklearn import preprocessing
 from sklearn.preprocessing import PolynomialFeatures
+from sklearn.decomposition import PCA
 import numpy
 
 
@@ -15,6 +16,37 @@ class Preprocess(object):
         Should return the modified dataset.
         """
         return NotImplementedError
+
+
+class SelectiveMultiplicativeInteraction(Preprocess):
+    """
+    :param dimensions: number of components to use.
+    :param degree: degree of interaction.
+    Use PCA to select highest variance components.
+    Multiply them together for additional features.
+    Concatenate the new features with the old features.
+    """
+
+    def transform(self, dataset, dimensions, degree):
+        pca = PCA(n_components=dimensions)
+        pca.fit(dataset)
+        pca_data = pca.transform(dataset)
+        pca_data = Interaction().transform(pca_data, degree=degree)
+        print 'dimensions:', len(dataset[0])
+        new_data = []
+        for p,d in zip(pca_data, dataset):
+            p = list(p)
+            new_data.append(d + p[dimensions:])
+        print 'dimensions:', len(new_data[0])
+        return new_data
+
+    def each_transformation(self, dataset):
+        size_range = range(2, 4)
+        dimension_range = range(10, 30)
+        for size in size_range:  # TODO move to config file
+            for d in dimension_range:
+                kwargs = {'size': size, 'dimensions': d}
+                yield self.transform(dataset), kwargs
 
 
 class ScalableInteraction(Preprocess):
